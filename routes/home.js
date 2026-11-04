@@ -1,11 +1,13 @@
-module.exports = function (router) {
+'use strict';
 
-    var homeRoute = router.route('/');
+const { respond } = require('../lib/http');
 
-    homeRoute.get(function (req, res) {
-        var connectionString = process.env.TOKEN;
-        res.json({ message: 'My connection string is ' + connectionString });
-    });
-
-    return router;
-}
+module.exports = function homeRoutes(router, ready) {
+  router.get('/', (req, res) => respond(res, 200, 'OK', { service: 'cs409-mp3-api' }));
+  router.get('/health', (req, res) => {
+    const connected = ready();
+    return respond(res, connected ? 200 : 503,
+      connected ? 'Ready' : 'Database unavailable', { ready: connected });
+  });
+  return router;
+};

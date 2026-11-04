@@ -9,12 +9,21 @@
     "Sujay Khandekar <khandek2@illinois.edu>"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=24 <25"
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "submit": "node submit.js"
+    "dev": "node --watch server.js",
+    "submit": "node submit.js",
+    "db:probe": "node scripts/probe-db.js",
+    "test": "node --test tests/unit/*.test.js",
+    "test:integration": "node --test --test-concurrency=1 tests/integration/*.test.js",
+    "check": "node scripts/check.js && npm test",
+    "fixtures:create": "node scripts/fixtures.js create",
+    "fixtures:clean": "node scripts/fixtures.js clean",
+    "acceptance:prepare": "node scripts/acceptance.js prepare",
+    "acceptance:run": "node scripts/acceptance.js run",
+    "acceptance:clean": "node scripts/acceptance.js cleanup"
   },
   "repository": {
     "type": "git",
@@ -24,8 +33,5 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "mongoose": "^9.0.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.10"
   }
 }

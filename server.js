@@ -1,36 +1,38 @@
-// Get the packages we need
-var express = require('express'),
-    router = express.Router(),
-    mongoose = require('mongoose');
+'use strict';
 
-// Read .env file
-require('dotenv').config();
+const path = require('node:path');
+const { once } = require('node:events');
+const mongoose = require('mongoose');
+const createApp = require('./app');
+const { connectDatabase } = require('./config/database');
+const { applicationPort } = require('./config/environment');
 
-// Create our Express application
-var app = express();
+async function start(environment = process.env) {
+  const port = applicationPort(environment.PORT);
+  await connectDatabase(environment.MONGODB_URI);
+  const server = createApp().listen(port, '0.0.0.0');
+  try {
+    await once(server, 'listening');
+  } catch {
+    await mongoose.disconnect();
+    throw new Error('HTTP server could not start. Check the configured port.');
+  }
+  console.log(`Server ready on port ${server.address().port}`);
+  return server;
+}
 
-// Use environment defined port or 3000
-var port = process.env.PORT || 3000;
+if (require.main === module) {
+  require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
+  start().then((server) => {
+    for (const signal of ['SIGINT', 'SIGTERM']) {
+      process.once(signal, () => {
+        server.close(() => mongoose.disconnect().then(() => process.exit(0)));
+      });
+    }
+  }).catch((error) => {
+    console.error(`Startup failed: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
 
-// Connect to a MongoDB --> Uncomment this once you have a connection string!!
-//mongoose.connect(process.env.MONGODB_URI).catch(function (err) { console.error('MongoDB connection error:', err.message); });
-
-// Allow CORS so that backend and frontend could be put on different servers
-var allowCrossDomain = function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-    next();
-};
-app.use(allowCrossDomain);
-
-// Parse URL-encoded and JSON request bodies
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// Use routes as a module (see index.js)
-require('./routes')(app, router);
-
-// Start the server
-app.listen(port);
-console.log('Server running on port ' + port);
+module.exports = { start };

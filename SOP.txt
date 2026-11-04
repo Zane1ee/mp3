@@ -1,0 +1,1674 @@
+MP3 STANDARD OPERATING PROCEDURE (SOP)
+=====================================
+Project: CS409 MP3 - APIed Piper / Task Management API
+Target repository: /Users/a16594/Desktop/uiuc FA26/cs 409/mp3
+Planning date: 2026-11-02 (America/Chicago)
+Version: 1.5 - Round 5 API acceptance/deployment preparation; Render creation pending
+Deadline: 2026-11-03, 11:59 PM CT, as stated in README.md
+
+CURRENT STATUS AND THIS ROUND'S BOUNDARY
+---------------------------------------
+The owner approved this SOP, all recommended D1-D7 choices, and Round 1
+configuration/development on 2026-11-02. The original planning-only gate is now
+historical; it does not block the authorized first round.
+
+Round 1 prepares contracts, environment probes, both models, shared validation/
+errors, service/readiness and all four GET operations. Local pure/transport
+checks are separate from real Atlas evidence. When private database URIs are
+missing, independent code preparation may proceed, but the environment gate,
+real query/index/transaction acceptance and a working local app remain pending.
+This is a scheduling adjustment, not a waiver or a claim that mocks prove MongoDB.
+
+Initial installation succeeded on Node 24.20.0 / npm 11.19.0. A private .env
+skeleton was created; its actual database configuration is not included here.
+Rounds 1-3 passed their technical checks on 2026-11-03; all ten User/Task
+resource methods are implemented. The owner authorized Round 4 (Steps 19-20)
+on 2026-11-03: complete the listed risk/failure trace and prepare a reproducible
+local release candidate. Owner manual acceptance, Render/current online release,
+actual grader feedback and course submission remain separate pending gates.
+The owner then authorized Round 5 and requested a focused review of queries,
+responses/validation, reference consistency, regression coverage and manual
+acceptance. On 2026-11-03 the owner confirmed no Render Web Service exists yet.
+API-only acceptance/deployment preparation proceeds locally; cloud/owner/grader/
+submission gates are not waived. Dated evidence appears below.
+
+Labels used throughout:
+  REQUIRED: explicit MP3 assignment requirement.
+  OBSERVED: directly verified in the current local files or read-only checks.
+  PROPOSED: original engineering choice; recommended D1-D7 were approved on
+            2026-11-02. A new material deviation still requires review.
+  UNRESOLVED: material does not establish one unambiguous behavior.
+  PENDING: not executed or not approved; never imply a successful runtime test.
+
+SOURCE-OF-TRUTH ORDER AND REFERENCES
+-----------------------------------
+1. The current MP3 source files and package-lock.json are the highest-confidence
+   baseline for existing behavior, paths, module system, dependencies, scripts,
+   and integration constraints. Correct speculative plans to fit actual files.
+2. README.md and FAQ.md define the desired assignment behavior and submission.
+   A missing feature in starter code is a development gap, not permission to
+   discard a README requirement. Distinguish CURRENT from TARGET when they differ.
+3. The owner's current instructions control scope, the planning-only boundary,
+   and the requirement for next-round approval. Old approvals apply to their
+   old projects; they do not authorize MP3 development or cloud configuration.
+4. MP1/MP2 SOPs and relevant project history guide process and documentation.
+   Their front-end libraries, Node 20 CI, Pages deployment, API dataset, visual
+   design, video requirement, and previous test results do not transfer to MP3.
+5. Official technical documentation supplements implementation details; it does
+   not silently replace locked versions or invent course/grader requirements.
+
+Local reference map (paths below are relative to this repository unless absolute;
+C1-C8 line references describe the original starter inspected during planning):
+  R1: README.md:18-156 - endpoints, models, queries, validation, consistency.
+  R2: README.md:158-209 - environment, deployment, grading, grader self-check.
+  R3: README.md:211-223 - individual work, sources, submission, LLM policy.
+  R4: FAQ.md:64-82,99-245,247-258 - runtime and behavioral clarifications.
+  C1: server.js:1-36; C2: routes/index.js:1-6; C3: routes/home.js:1-11.
+  C4: models/user.js:1-10; C5: package.json:11-29; C6: package-lock.json.
+  C7: submit.js:1-62; C8: .env.example:1-4 and .gitignore:1-12.
+  P1: ../mp1/SOP.txt - 24-step Actions/Verify, owner gate, final source review.
+  P2: ../mp2/SOP.txt - 24-step flow, five implementation rounds, real evidence.
+  P3: ../mp2-local-reference/2026-10-06-document-cleanup/SOP.txt and
+      ROUND1_ACCEPTANCE.md / ROUND5_ACCEPTANCE.md - detailed manual QA examples.
+  P4: Prior chat "编写 MP2 开发 SOP" - final documentation preference: English
+      SOP, actual share links in llm_logs.csv, concise public process records.
+      Retrieved relevant messages; unrelated projects sharing an MP2 label were
+      excluded. No unverified memory is treated as a current runtime result.
+
+WORKLOAD, DELIVERABLES, AND GRADING PRIORITIES
+--------------------------------------------
+- Difficulty: medium-high. The main work is a database-backed HTTP contract,
+  strict validation, full replacement, and coordinated multi-document writes.
+- Scope: two collections, four route patterns, ten method/path combinations,
+  collection queries, single-resource select, safe errors, public deployment.
+- Deliver: public source repository; working Render Web Service connected to
+  MongoDB Atlas; actual references/chatlogs; owner grading-form submission.
+- FAQ requires no video and no fixed volume of initial data. This SOP's fixtures,
+  OpenAPI, test collection, and test scripts are proposed engineering aids.
+- Illustrative effort after access/design approval: 12-20 focused hours for an
+  experienced developer, potentially 20-35 for a student learning transactions
+  and deployment. Estimates are not promises or assignment criteria. Compare
+  the actual remaining time to the deadline before the owner authorizes work.
+- Rubric: creation/validation 20%; single-resource select 7.5%; PUT on missing
+  resources 10%; reference consistency 27.5%; task queries 15%; deletion 20%.
+- All documented functionality remains required even where absent from a rubric
+  row: users queries, skip, replacement defaults, dates, and error ordering.
+
+------------------------------------------------------------
+STEP 1: FREEZE MP3 SCOPE AND REQUIREMENT TRACEABILITY
+------------------------------------------------------------
+Actions:
+  - Assign stable requirement IDs: DATA (models/defaults), HTTP (routes/status),
+    QUERY (query composition), VALID (validation/order), REF (relationships),
+    ATOM (no partial writes), ENV (runtime/cloud), and SUB (submission/policy).
+  - Plan all ten methods; keep /api as the only resource prefix. Do not add
+    front-end implementation, authentication, a third-party todo API, or MP2
+    framework requirements to the mandatory scope.
+  - Preserve README, FAQ, LICENSE, .gitignore and the starter integration intent.
+    Record proposed additive files separately from files already present.
+Test / review:
+  - Trace every R1 rule and all six rubric rows to a step and an observable test
+    in Appendix A; compare against the full README, not just the grading table.
+Acceptance:
+  - All requirements have coverage; proposed choices are labeled. Planning work
+    has not been mistaken for implemented endpoints. Status: planning complete.
+
+------------------------------------------------------------
+STEP 2: RECORDED ORIGINAL STARTER BASELINE
+------------------------------------------------------------
+Actions:
+  - Keep CommonJS require/module.exports and the existing server/routes/models
+    organization. This is an existing Node service, not an empty Vite project.
+  - C1 loads dotenv, uses PORT || 3000, sets CORS headers, parses URL-encoded and
+    JSON bodies, mounts routes, and listens. mongoose.connect is commented out.
+  - C2/C3 currently expose only GET /api/. Its message contains TOKEN, not the
+    MongoDB URI; it does not return data or establish database readiness.
+  - C4 currently defines only name: String; there is no Task model or business
+    route. There are no test scripts, OpenAPI, or deployment workflow in the tree.
+  - C5 ranges are Express ^5.1.0, Mongoose ^9.0.0, dotenv ^17.2.3, nodemon
+    ^3.1.10. C6 actually locks 5.3.0 / 9.11.1 / 17.4.2 / 3.1.14 respectively.
+  - Existing commands: npm start -> node server.js; npm run dev -> nodemon
+    server.js; npm run submit -> node submit.js. There is no npm run build,
+    test, lint, or typecheck command yet. Do not claim these already exist.
+  - Read-only host check: Node v24.20.0 and npm 11.19.0. No .env or node_modules
+    exists. Version checks do not prove install, Atlas, or Render readiness.
+Test / review:
+  - Re-read C1-C8 and the locked package versions. Capture hashes of existing
+    files before changing anything; compare them at the end of this round.
+Acceptance:
+  - Current and proposed files are distinguished; no MP1/MP2 build/deploy
+    assumption leaks into MP3. Status: static baseline verified; runtime pending.
+
+------------------------------------------------------------
+STEP 3: PLAN PRE-CODE ENVIRONMENT, ACCESS, AND TOOLS
+------------------------------------------------------------
+Actions:
+  - Before feature coding, approve D1-D7 and obtain access to Atlas and Render.
+    Git/account foundations are assumed complete and are not repeated here.
+  - Runtime: use explicit Node 24 LTS locally and on Render. The existing
+    engines >=24 range is observed but does not constrain a future major.
+    PROPOSED: pin an available verified 24.x patch consistently and bound engines
+    to >=24 <25. Do not inherit MP2's Node 20 or silently upgrade dependencies.
+  - Dependency installation: use the committed lockfile with npm ci after
+    approval. Record failures before altering manifests; no forced audit upgrade.
+  - Atlas: prepare a cluster, database user, SRV URI, database names, and network
+    access required by README (Allow access from anywhere). The database user
+    is distinct from the Atlas website login. Keep the real URI outside chat,
+    source, test exports and logs; enter it into local/cloud environment fields.
+  - PROPOSED: separate dev, test, and deployment logical databases in Atlas;
+    use TEST_MONGODB_URI for integration tests and MONGODB_URI for the app.
+    Prove transaction commit AND abort on the selected database before writes.
+    A standalone local MongoDB is insufficient for this proposed transaction
+    design. Docker or a local replica set is optional, not a prerequisite.
+  - Later create .env from .env.example; retain TOKEN, fill MONGODB_URI, use
+    PORT=3000 only if needed. Add TEST_MONGODB_URI to the example with no secret
+    only after D2 approval. NODE_ENV is deployment configuration, not an API key.
+  - Render: prepare a Web Service, repository/branch, environment variables,
+    Node 24 selection, build command npm ci, start command npm start, public
+    HTTPS origin, PORT binding and a DB-readiness health endpoint (D1/D7).
+  - No external application API key is required: this project creates the API.
+    Atlas credentials are required; a Render API token is needed only if the
+    owner later chooses API-based deployment automation rather than Dashboard.
+  - No mandatory MCP is needed. Files/terminal, HTTP requests, Postman or curl,
+    and browser access to Atlas/Render are sufficient. Atlas/Render/GitHub MCP
+    connections are optional conveniences, not grading or development gates.
+    Do not request, install or grant them broad access merely because available.
+Test / review:
+  - This round: verify the preparation checklist and missing inputs only.
+  - Next round before business coding: Node 24, npm ci, DB ping, index creation,
+    transaction commit/abort and a non-secret health response must succeed.
+Acceptance:
+  - A real preparation checklist exists; no credentials or cloud readiness are
+    invented. Environment provisioning and runtime probes remain PENDING.
+
+------------------------------------------------------------
+STEP 4: SPECIFY USER/TASK DATA AND REPLACEMENT SEMANTICS
+------------------------------------------------------------
+Actions:
+  DATA-U:
+    _id: server-generated ObjectId, serialized as a string in JSON.
+    name: required string; email: required string, unique across other users.
+    pendingTasks: [String], only existing incomplete tasks belonging to this user.
+    dateCreated: server time at creation; client input ignored; immutable on PUT.
+  DATA-T:
+    _id: same server-generated identity behavior as User.
+    name: required string; description: String; deadline: valid Date.
+    completed: Boolean; assignedUser: String; assignedUserName: String.
+    dateCreated: same server-owned behavior as User.
+    Required unassigned pair: assignedUser="", assignedUserName="unassigned".
+  PROPOSED D4 normalization/defaults:
+    - missing pendingTasks -> []; description -> ""; completed -> false;
+      assignedUser -> "". Missing assignedUserName is derived from its user,
+      or becomes "unassigned". Explicit wrong types/null are not omissions.
+    - Trim required name/email outer whitespace and reject empty results.
+      Preserve email case. PROPOSED: use a lightweight email address-shape check
+      and reject malformed addresses, without DNS checks or an overly restrictive
+      regex. Do not add future-only deadlines, length caps or lowercasing rules.
+    - Accept valid date strings supported by the declared parser, including
+      ordinary date-only values; serialize dates as ISO. Reject invalid dates,
+      including invalid calendar components that a parser might silently roll
+      forward. Test timezone offsets representing the same instant. Do not
+      restrict to future deadlines or only one ISO spelling.
+    - Reference IDs are valid ObjectId-format strings, stored as strings in
+      pendingTasks/assignedUser. Normalize equivalent hex spelling and deduplicate
+      pendingTasks while preserving first occurrence. Never auto-populate these
+      fields with full documents or change their API type to embedded objects.
+    - Only mapped business fields are writable. Ignore client _id, dateCreated,
+      __v and unknown body properties; never pass req.body as a Mongo update.
+  PUT is full business-field replacement, not PATCH and not upsert. Both required
+  fields must be supplied again. Apply optional defaults explicitly rather than
+  allowing omitted paths to retain old values. Retain _id/dateCreated.
+  Deleting a user unassigns their tasks; it does not delete those task documents.
+Test / review:
+  - Table-test omission vs null/wrong type, creation defaults, immutable dates,
+    duplicate email, duplicate references, own-email retention and full PUT.
+Acceptance:
+  - Contract records each field's ownership, type and default. Proposed details
+    await D4; the required model fields and replacement behavior are fixed.
+
+------------------------------------------------------------
+STEP 5: FREEZE ROUTES, RESPONSES, AND VALIDATION ORDER
+------------------------------------------------------------
+Actions:
+  HTTP-01 GET    /api/users      -> 200, data: array or number with count=true.
+  HTTP-02 POST   /api/users      -> 201, data: created user.
+  HTTP-03 GET    /api/users/:id  -> 200, data: user; nonexistent/invalid id 404.
+  HTTP-04 PUT    /api/users/:id  -> 200, data: updated user; missing target 404.
+  HTTP-05 DELETE /api/users/:id  -> D6 success policy; missing target 404.
+  HTTP-06 GET    /api/tasks      -> 200, data: array or number with count=true.
+  HTTP-07 POST   /api/tasks      -> 201, data: created task.
+  HTTP-08 GET    /api/tasks/:id  -> 200, data: task; nonexistent/invalid id 404.
+  HTTP-09 PUT    /api/tasks/:id  -> 200, data: updated task; missing target 404.
+  HTTP-10 DELETE /api/tasks/:id  -> D6 success policy; missing target 404.
+  - Resource responses use exactly message (human-readable string) and data.
+    PROPOSED error data is {}; do not expose stack traces, raw cast/duplicate-key
+    text, database paths, credentials, or internal error objects.
+  - VALID order for parsable POST/PUT bodies:
+      1. Validate URL id/target existence for member routes -> 404.
+      2. Validate field types, required values and reference ID formats -> 400.
+      3. Check email uniqueness, excluding the current user's id -> 400.
+      4. Resolve referenced documents -> 404 if an otherwise valid ID is absent.
+      5. Check fetched-state rules: pending task incomplete, assigned name
+         matches actual user -> 400.
+      6. Execute the complete write transaction; unexpected failure -> 500.
+    The completed/name checks require document reads; do not claim to evaluate
+    them without resolving references. Cover missing/completed mixed cases.
+  - Malformed JSON bodies fail during parsing -> 400 envelope; there is no
+    meaningful field-validation order until parsing succeeds. For member GET
+    with both invalid/missing target and invalid select, PROPOSED target 404
+    first (D5). For irrelevant member query parameters, ignore without parsing.
+  - Preserve both existing request body parsers. PROPOSED: JSON requires actual
+    JSON types; URL-encoded transport explicitly decodes completed=true/false
+    and pendingTasks as a JSON-array string or a parsed array, then uses the
+    same strict validator. "false" must never become truthy via Boolean(value).
+  - D6 is unresolved: README lists 204 and also requires two-field JSON but
+    does not assign DELETE one explicit success status. No starter DELETE or
+    local grader code resolves it. Proposed fallback is DELETE 200 with
+    {"message":"Task deleted","data":[]} (analogous User message). A course
+    clarification may instead require 204 with NO body. Never send JSON under
+    204. OPTIONS may legitimately return 204, but does not prove grader intent.
+Test / review:
+  - Contract cases include every status, error precedence, parser failures,
+    both body encodings and response shape. Verify actual updated, not old, data.
+Acceptance:
+  - No endpoint invents its own status/error convention. D6 is visibly pending;
+    the owner may approve the fallback while acknowledging unverified grading.
+
+------------------------------------------------------------
+STEP 6: SPECIFY QUERY PARSING AND DATABASE EXECUTION
+------------------------------------------------------------
+Actions:
+  QUERY-01: collection where is a JSON object passed to a Mongoose query.
+    Preserve documented operators such as $in; ordinary equality, comparison,
+    Boolean and multi-field filters must work. Do not sanitize away valid
+    operators or fetch every document to filter in JavaScript.
+  QUERY-02: sort is a JSON field/direction object, directions 1 or -1.
+  QUERY-03: select is a JSON include/exclude object, values 1 or 0; permit the
+    normal _id exception. Invalid mixed projections -> 400, not leaked DB error.
+  QUERY-04: skip is a nonnegative integer, default 0. PROPOSED reject fractional,
+    negative, nonnumeric, repeated and non-scalar pagination input -> 400.
+  QUERY-05: limit is a nonnegative integer. Default tasks=100; users=unlimited.
+    PROPOSED explicit limit=0 means unlimited, matching Mongo query semantics;
+    do not invent an undocumented maximum or silently clamp requested values.
+  QUERY-06: count accepts JSON true/false; parse false as false. Return a number
+    in data when true. PROPOSED count means all where-matching documents BEFORE
+    skip/limit, independent of sort/select. Validate recognized collection
+    parameters first, even when count makes some of them operationally unused.
+    README does not fully specify this pagination interaction: D5 must freeze it.
+  QUERY-07: any combination of the six recognized parameters must work.
+    Decode URL encoding once through the framework, then parse JSON once.
+    Invalid recognized JSON/type -> 400. PROPOSED ignore unknown query keys.
+  QUERY-08: member GET supports only select. Ignore where/sort/skip/limit/count,
+    including malformed values, rather than accidentally filtering out the id.
+  QUERY-09: unmatched collection -> 200 with [] or 0; member absent -> 404.
+  - Query implementation uses Mongoose find/filter/sort/select/skip/limit and
+    countDocuments, not post-query array filtering/slicing/counting.
+  - API order without sort is not promised. For deterministic pagination tests,
+    provide a unique sort key or explicit tie-breaker; do not assert DB natural
+    order. Do not inadvertently exclude _id from internal relationship logic.
+Test / review:
+  - Test both resources, inclusion/exclusion, $in, combined parameters, invalid
+    JSON, count=false, defaults with 101 fixtures, limit=0, empty and member cases.
+  - Review emitted query construction as well as HTTP results: output alone
+    cannot prove that filtering/paging happened inside the database.
+Acceptance:
+  - One shared parser/query builder implements the frozen D5 policy; list vs
+    member semantics remain distinct. Runtime tests remain PENDING.
+
+------------------------------------------------------------
+STEP 7: DEFINE RELATIONSHIP INVARIANTS AND ATOMICITY
+------------------------------------------------------------
+Actions:
+  REF-01: every incomplete assigned task occurs exactly once in its user's
+    pendingTasks; every pendingTasks entry points to that same incomplete task.
+  REF-02: completed tasks occur in no pendingTasks but may stay assigned.
+  REF-03: task assignedUserName equals the current assigned user's name, even
+    for completed tasks; an unassigned task always has the required empty pair.
+  REF-04: no reference points to a missing user/task; at most one user owns a
+    task. Moving a task owned by another user is valid and removes old ownership.
+  REF-05: User POST with pendingTasks and Task POST with assignedUser follow
+    the same synchronization rules as their corresponding replacements.
+  - User PUT: compare old/new pending IDs. Removed -> unassign; new -> assign
+    and remove from any previous user's pending list. Retained pending tasks
+    remain assigned. Completed tasks already assigned remain assigned despite
+    being absent from pendingTasks. Renaming updates ALL assigned tasks.
+  - Task PUT: remove from former user's pending list; add to the requested
+    user's list iff incomplete; completed assignments remain valid; reopening
+    restores membership; omitted assignment resets to unassigned on replacement.
+  - Task DELETE removes pending membership; User DELETE queries all tasks by
+    assignedUser, including completed tasks, and unassigns them before deletion.
+  ATOM-01: rejected/failed writes change no resource or relationship documents.
+  PROPOSED D2 mechanism:
+    - Use a single shared transaction service. Re-read relevant state, check
+      referenced existence/email and compute differences inside the transaction.
+      Any target precheck outside it must be repeated where state can change.
+    - Every participating read/write carries the same session. Execute DB
+      operations sequentially inside a session; no Promise.all or nested
+      transaction. End sessions in all paths; send success only after commit.
+    - Retry supported transient conflicts by recomputing from current state.
+      No HTTP response, external side effect, or stale change-set replay inside
+      a retryable transaction callback. Bound failure handling and return safe 500.
+    - Transactions alone do not excuse stale-read races. Ensure all related
+      mutations conflict on shared user/task documents using persisted version
+      guards (existing internal __v or an equivalent reviewed mechanism).
+      Guard/touch the assigned user even for completed-task assignment, where
+      pendingTasks may not change, to coordinate with concurrent rename/delete.
+      Do not rely on process-local locks or no-op updates as a complete solution.
+    - Enforce email uniqueness with a real unique index and map duplicate-key
+      races to 400. A pre-query or unique schema option alone is not sufficient.
+Test / review:
+  - Run an invariant checker after every successful mutation; compare normalized
+    before/after snapshots after every rejected request and injected failure.
+  - Race same-task transfers, two tasks assigned to one user, rename/assignment,
+    completion/transfer and user deletion/completed-task assignment. Verify
+    serializable final business outcomes, no lost membership or dangling IDs.
+Acceptance:
+  - One centralized design covers every POST/PUT/DELETE and failure path. The
+    owner approves the transaction dependency; actual atomicity is proved later.
+
+------------------------------------------------------------
+STEP 8: LOCK THE ARCHITECTURE AND CONTRACT ARTIFACTS
+------------------------------------------------------------
+Actions:
+  - Preserve server.js as the runtime entry, with a small optional app.js factory
+    extracted only to make HTTP tests start/stop the app independently of listen.
+  - Extend routes/index.js under the existing /api mount. If retaining the shared
+    router, mount it once; if using independent routers, update the wiring in a
+    single reviewed change. Avoid duplicate handlers or double /api prefixes.
+  - Proposed components: models/user.js + models/task.js; user/task route
+    handlers; shared query/body validators; response/error middleware; a single
+    relationship transaction service; connection/startup module; HTTP tests.
+  - Do not scatter cross-collection cascade writes across route handlers and
+    Mongoose hooks. Schema validation protects single documents; service rules
+    protect references, validation order and multi-document atomicity.
+  - After owner approval and before business implementation, create:
+      docs/api-contract.md: authoritative readable approved behavior/decisions.
+      docs/openapi.yaml: schemas, ten operations, query and error examples.
+      tests/: executable contract, transition, rollback and concurrency cases.
+      docs/mp3.postman_collection.json: proposed manual runner/fixtures (D3).
+      SOURCES.md and llm_logs.csv: actual sources and later real chat links.
+    These files do not exist yet. Do not describe them as completed artifacts.
+  - Give contract cases the stable DATA/HTTP/QUERY/VALID/REF/ATOM IDs. Require
+    contract -> tests -> implementation -> review for every behavior change.
+    Tests must exercise external behavior and invariants, not copy implementation.
+  - Maintain one SOP plus concise contract/test materials. Following MP2's later
+    preference, do not automatically add a permanent ROUNDn report per turn.
+    Give round acceptance results in chat; retain substantial machine evidence
+    only when it adds reproducibility and contains no secret or personal data.
+Test / review:
+  - Trace all routes from server.js to handlers. Review schemas/examples against
+    the same approved contract. Identify and remove contradictory duplicated specs.
+Acceptance:
+  - The structure fits current code; proposed contract artifacts and their update
+    rule make design reviewable and enforceable. Creation remains PENDING.
+
+------------------------------------------------------------
+STEP 9: DEFINE RISK-BASED TESTS AND EVIDENCE
+------------------------------------------------------------
+Actions:
+  - PROPOSED D3: use Node 24 built-in test/assert and fetch for pure and real HTTP
+    integration tests. Reuse Mongoose; add no test framework unless needed.
+  - Plan npm test for pure tests; npm run test:integration for the isolated DB
+    suite; npm run check for syntax/contract checks and the intended test gates.
+    These are future scripts. Do not claim TypeScript/lint/build gates exist.
+  - Add pure tests for body/query normalization and set differences; real HTTP
+    tests for the ten endpoints, status precedence, dates and replacement.
+  - Integration startup verifies TEST_MONGODB_URI is explicitly set and points
+    at a designated test database distinct from the app/deployment database.
+    Tests create unique run-owned fixture IDs and delete only those IDs in
+    finally cleanup. Never drop a database or wipe all users/tasks for test setup.
+  - Test 101 tasks and 101 users for list defaults. Fixture generation belongs
+    in isolated setup; no hidden production seed endpoint or arbitrary data cap.
+  - Inject failure after the first relationship write in an internal test hook
+    or repository stub inside a REAL transaction. Compare all touched data after
+    rollback. Do not expose public fault toggles or stop a live grading database.
+  - Add concurrency tests described in Step 7, duplicate-email races and a
+    deterministic invariant checker. Mocks alone cannot certify Mongo rollback.
+  - Record actual commands, versions, DB role/name with secrets redacted, cases,
+    results, and remaining limitations. Do not invent a future test count/score.
+Test / review:
+  - Walk Appendix A and the risk register; identify at least one meaningful
+    verification for each risk and each rubric item.
+Acceptance:
+  - Verification is observable and repeatable, including rollback and defaults.
+    Runtime execution and owner manual checks are clearly PENDING.
+
+------------------------------------------------------------
+STEP 10: REVIEW THIS DRAFT AND PASS THE OWNER GATE
+------------------------------------------------------------
+Actions:
+  - Finish a separate review of the written draft against C1-C8 first, then R1-R4.
+    Correct architecture/version/status assumptions; record findings below.
+  - Present D1-D7, access/preparation gaps and unresolved grading semantics.
+    Do not interpret silence, an old MP2 approval, or this document as approval.
+  - Stop this round after delivering the SOP. In the next conversation, begin
+    Step 11 only when the owner approves the relevant choices and authorizes work.
+Test / review:
+  - Check all 24 steps have Actions, Test / review and Acceptance; check manual
+    operations include concrete requests, prerequisites and expected results.
+  - Compare original-file hashes and working-tree changes. Only SOP.txt may be
+    added this round; no source/config/lockfile or environment change is allowed.
+Acceptance:
+  [x] Current materials and relevant prior SOP/history have been read.
+  [x] Requirements, contracts, risks, environment, tests and manual QA are planned.
+  [x] Post-draft code/README review complete; findings recorded below.
+  [x] D1-D7 recommended choices approved for MP3 on 2026-11-02, including D6 fallback.
+  [x] Owner explicitly authorized Round 1 configuration/development on 2026-11-02.
+  Runtime prerequisites are checked in Step 11, before business implementation;
+  they are not falsely marked passed while only a starter template exists.
+
+EXECUTION BATCHES AND OWNER CHECKPOINTS
+--------------------------------------
+Original planning round: Steps 1-10; document and review only.
+Round 1: Steps 11-14; environment proof, contract artifacts, models, shared
+  response/errors and complete read/query endpoints. Use isolated fixtures;
+  manually verify read cases M01-M04 with the supplied Round 1 fixture IDs.
+  Obtain an early Render reachability/readiness proof if access is available.
+Round 2: Steps 15-16; transaction foundation and Task POST/PUT; use isolated
+  fixture users for pending/completed/reassignment checks M05-M07, M09-M10.
+Round 3: Steps 17-18; User POST/PUT, both DELETE operations and all cross-resource
+  transitions. Full M01-M17 normal/reference chain becomes available.
+Round 4: Steps 19-20; complete error matrix, failure injection, concurrency,
+  default pagination, contract/source review and release-candidate acceptance.
+Round 5: Steps 21-24; current Render release, online HTTP checks, actual grader,
+  owner full manual acceptance and course submission preparation.
+Each round builds on the accepted preceding baseline. Report exact scope,
+actual tests and targeted manual checks with expected results; await the owner's
+round acceptance when working in this staged workflow. Previously approved D
+choices do not require repeated approval unless they change. A failed check
+blocks the dependent claim, not unrelated diagnostic work.
+
+------------------------------------------------------------
+STEP 11: PREPARE AND PROVE THE RUNTIME BEFORE FEATURE CODING
+------------------------------------------------------------
+Actions:
+  - After authorization, confirm the mp3 directory, Node 24 and original files;
+    npm ci; create local .env securely; configure distinct test URI (D2).
+  - Verify connection using a disposable probe; create required collections and
+    await indexes before writes; commit/abort one run-owned transaction fixture.
+  - Plan the minimal startup change to await DB readiness before listening, use
+    PORT, and report connection failure without logging the URI. Release bind
+    must be reachable by Render, not explicitly limited to localhost.
+  - Add the approved /api/health readiness endpoint and test lifecycle support
+    if D1 is approved. Home response must not masquerade as DB proof.
+Test / review:
+  - npm ci succeeds without lockfile drift; Node reports 24.x; DB ping/index/
+    commit/abort checks pass; missing/invalid URI has a clear safe failure.
+  - M01 and the minimal early Render health request if cloud access is ready.
+Acceptance:
+  - Environment is actually ready before business code. Any missing account,
+    permissions, transaction support or network access is recorded, not assumed.
+
+------------------------------------------------------------
+STEP 12: MATERIALIZE THE APPROVED CONTRACT AND TEST HARNESS
+------------------------------------------------------------
+Actions:
+  - Write the Step 8 contract/OpenAPI and D decisions, prepare request examples,
+    source list and an isolated HTTP test app lifecycle.
+  - Add approved test scripts and Postman collection. Keep secrets out of exports;
+    use apiBase/runTag/returned IDs as variables. Test DB targets must be explicit.
+Test / review:
+  - Parse/validate the OpenAPI document; every method and schema matches the
+    readable contract. Harness starts/stops cleanly and fixture cleanup works.
+  - Pure parser/normalization cases have independent expected values.
+Acceptance:
+  - A reviewed contract and runnable verification exist before route logic;
+    no proposed policy is silently promoted to a course requirement.
+
+------------------------------------------------------------
+STEP 13: IMPLEMENT MODELS AND SHARED RESPONSE/ERROR HANDLING
+------------------------------------------------------------
+Actions:
+  - Complete User; add Task; set explicit defaults and server-owned dates;
+    establish the real email unique index and await its readiness.
+  - Implement field whitelists/transport decoding, strict validation and one
+    safe response/error layer, including malformed JSON, unknown API paths,
+    cast errors and duplicate-key errors.
+  - Keep GET /api as a simple service-information route in the common envelope;
+    replace the misleading TOKEN-as-connection-string demo message. Retain the
+    template TOKEN environment value per FAQ; never return MONGODB_URI. The
+    separate approved health route is responsible for DB readiness (D1).
+  - Preserve current CORS capability and add correct OPTIONS behavior if needed.
+Test / review:
+  - DATA/VALID pure and model cases: required/wrong types, invalid date, defaults,
+    immutable dates, duplicate email including a race, client-owned-field attacks.
+  - Raw HTTP malformed JSON and unknown-path cases return the approved envelope;
+    OPTIONS exposes supported methods/headers with the chosen no-content response.
+Acceptance:
+  - Individual documents and errors satisfy the contract; model casting cannot
+    turn invalid JSON types into apparently valid input.
+
+------------------------------------------------------------
+STEP 14: IMPLEMENT ALL READ AND QUERY OPERATIONS
+------------------------------------------------------------
+Actions:
+  - Implement User/Task collection GET and member GET, shared query parsing,
+    Mongoose query composition, count branch, projections and missing handling.
+  - Use isolated fixture setup while write endpoints are not yet complete.
+Test / review:
+  - QUERY-01..09, M02-M04 read equivalents, both resources and 101-item defaults.
+    Review database query construction; assert member ignores malformed where.
+Acceptance:
+  - All four GET operations and their combinations pass. No post-fetch paging,
+    selection or filtering is used to substitute for Mongoose query methods.
+
+------------------------------------------------------------
+STEP 15: IMPLEMENT THE SHARED ATOMIC RELATIONSHIP SERVICE
+------------------------------------------------------------
+Actions:
+  - Implement the Step 7 transition plan, same-session sequential operations,
+    index/duplicate handling, conflict/version guards, commit and retry behavior.
+  - Keep transaction boundaries above resource-specific mutation helpers.
+Test / review:
+  - Direct service integration cases exercise assign, transfer, complete, reopen,
+    rename and cleanup. Inject an error after an actual first write and verify
+    complete rollback. Test session use and absence of nested/parallel sessions.
+Acceptance:
+  - Transaction and invariant evidence exists before handlers rely on the
+    service. If atomicity fails, do not substitute sequential saves and proceed.
+
+------------------------------------------------------------
+STEP 16: IMPLEMENT TASK CREATE AND FULL REPLACEMENT
+------------------------------------------------------------
+Actions:
+  - Implement Task POST/PUT through the shared service. Validate URL target first,
+    required fields/types, referenced user and assignedUserName. Derive omitted
+    names; preserve dateCreated; apply optional defaults on every PUT.
+Test / review:
+  - HTTP-07/09; M03/M05-M07/M09-M10/M14 equivalents; assigned/unassigned and
+    completed creation, completed reassignment, reopen, omitted optional fields,
+    missing URL target, mismatched name, bad reference, safe failure snapshots.
+Acceptance:
+  - Response shows committed new state and every touched user's correct pending
+    list; completed tasks stay assigned without pending membership.
+
+------------------------------------------------------------
+STEP 17: IMPLEMENT USER CREATE AND FULL REPLACEMENT
+------------------------------------------------------------
+Actions:
+  - Implement User POST/PUT, unique email excluding self, pending validation,
+    list differences, stealing valid pending tasks, and all-task rename cascade.
+  - Keep completed assigned tasks outside pendingTasks while updating their names.
+Test / review:
+  - HTTP-02/04; M02/M08/M11-M13; absent pendingTasks, duplicate IDs/email,
+    own-email retention, completed/nonexistent refs, POST with pendingTasks,
+    simultaneous valid/invalid refs and zero mutation on rejection.
+Acceptance:
+  - Both directions of writes preserve every REF invariant. Renaming is tested
+    on completed tasks, not just the user's pending list.
+
+------------------------------------------------------------
+STEP 18: IMPLEMENT BOTH DELETIONS AND REFERENCE CLEANUP
+------------------------------------------------------------
+Actions:
+  - Implement Task/User DELETE using the same service and approved D6 policy.
+  - Remove task pending membership; unassign all user tasks including completed;
+    retain task documents when deleting a user. Missing/malformed target -> 404.
+Test / review:
+  - HTTP-05/10 and M17-M18; fetch deleted resource -> 404; repeat DELETE -> 404;
+    related surviving records remain valid. Fail after first cleanup write and
+    prove neither the resource nor reference changes survive the abort.
+Acceptance:
+  - Deletion, response status/body and cleanup all pass; a successful DELETE
+    response alone is insufficient evidence.
+
+------------------------------------------------------------
+STEP 19: RUN THE COMPLETE RISK AND FAILURE MATRIX
+------------------------------------------------------------
+Actions:
+  - Run Appendix A, the invariant checker, error precedence combinations,
+    parser/type cases, immutable dates, replacement and query combinations.
+  - Exercise Step 7 races with barriers/controlled scheduling rather than relying
+    on one lucky concurrent run. Include completed-task assign vs user delete.
+  - Test JSON and URL-encoded requests against the real HTTP server. Isolate
+    unavailable-DB/fault tests from normal app and deployment databases.
+Test / review:
+  - Pure + integration suites exit successfully; every failure snapshot matches
+    the prior business state. Concurrent outcomes have no orphan/stale-name/
+    duplicate/lost pending entries; duplicate emails never both commit.
+Acceptance:
+  - All required risk cases have actual evidence. Fix failures and rerun affected
+    checks; broaden/repeat only when a new change or unresolved issue warrants it.
+
+------------------------------------------------------------
+STEP 20: REVIEW THE RELEASE CANDIDATE AGAINST ACTUAL FILES
+------------------------------------------------------------
+Actions:
+  - Review final server/router/model/service flow against the working code and
+    lockfile first, then reconcile every R1-R4 requirement and contract case.
+  - Run npm ci and approved check/test gates. There is no generated front-end
+    bundle or mandatory npm run build unless one was deliberately introduced.
+  - Inspect intended source/config/docs only; preserve .gitignore; keep .env,
+    node_modules, secret-bearing exports/logs and personal backups out of source.
+Test / review:
+  - Full contract/rubric trace has no missing row; syntax/install/test gates pass;
+    starter protected documents remain intact; no unapproved dependency upgrade.
+Acceptance:
+  - A reproducible release candidate exists. Mark local acceptance separately
+    from Render acceptance, owner acceptance and actual course submission.
+
+------------------------------------------------------------
+STEP 21: DEPLOY THE VERIFIED SERVICE TO RENDER
+------------------------------------------------------------
+Actions:
+  - Use the existing authorized repository setup and the agreed release path;
+    do not repeat basic Git configuration or assume permission for unrelated work.
+  - Configure a Render Web Service with npm ci / npm start, explicit Node 24,
+    secret MONGODB_URI, retained TOKEN if home is kept, and public PORT binding.
+    NODE_VERSION must agree with the approved verified local version.
+  - Configure DB readiness health path if adopted. Capture deployed revision and
+    the actual public origin; do not invent an available service hostname.
+Test / review:
+  - Inspect successful build/start/current revision, health and a real resource
+    query over HTTPS. Verify Atlas network/user access; server logs reveal no URI.
+Acceptance:
+  - Current release is publicly reachable and database-backed. A dashboard green
+    badge or the old TOKEN homepage alone is not release acceptance.
+
+------------------------------------------------------------
+STEP 22: RUN ONLINE VERIFICATION AND THE COURSE SELF-CHECK
+------------------------------------------------------------
+Actions:
+  - Run scoped online create/query/update/transfer/delete smoke cases using
+    disposable IDs; verify surviving/deleted resources and clean own fixtures.
+  - Change only API_URL in submit.js to the actual deployment ORIGIN (no /api);
+    preserve AUTOGRADER_URL and the existing six-minute timeout behavior.
+  - Warm a sleeping service, then npm run submit. Record actual score/feedback;
+    batch fixes and respect the stated approximate 5 runs / 2 minutes limit.
+  - The grader may create records; clean leftovers by known grader IDs after
+    inspection, never by wiping the database. Running it is not form submission.
+Test / review:
+  - All ten methods behave online; select/query/status/reference examples pass;
+    actual grader returns its report. Do not promise a score before a real run.
+Acceptance:
+  - Target full rubric credit and no known required failure. Any unresolved
+    grading ambiguity or failed case remains explicit and blocks a full-pass claim.
+
+------------------------------------------------------------
+STEP 23: HAVE THE OWNER MANUALLY ACCEPT THE FINAL PROJECT
+------------------------------------------------------------
+Actions:
+  - Provide Appendix B, current local/online URLs, exact release revision and
+    actual automated results in the round response. Use the agreed Postman
+    collection or equivalent method; no custom frontend is needed for testing.
+  - Owner runs the complete manual chain on the deployed origin with a unique
+    runTag, including mutation, failure snapshots, deletion and cleanup.
+Test / review:
+  - M01-M20 give expected status, data and linked-resource state. Observe saved
+    fields through fresh GET requests, not only the write response or DB cache.
+Acceptance:
+  - Owner explicitly confirms manual acceptance or reports mismatches. Do not
+    claim to have performed their checks; resolve failures before closure.
+
+------------------------------------------------------------
+STEP 24: COMPLETE REFERENCES AND COURSE SUBMISSION
+------------------------------------------------------------
+Actions:
+  - Ensure public source contains app, lockfile, .env.example, tests/approved
+    contract, SOURCES.md, SOP and actual chatlog references; preserve .gitignore.
+  - Follow the owner's existing preference for real current share URLs in
+    llm_logs.csv. Verify readable coverage of planning/code rounds; a share is
+    a snapshot and may need a later link. Never reuse MP1/MP2 links as MP3 logs.
+  - Owner uses https://forms.gle/4V1v2VWU78XwM3H57 from the current MP3 README,
+    checks the actual form fields, enters real personal information/repo/API
+    details and references as requested, answers the LLM experience survey, and
+    submits before the deadline. Form contents have not been inspected this round.
+  - No video, Drive-sharing workflow or fixed initial dataset is added to MP3.
+    Keep Render/Atlas working for grading; save the real form confirmation.
+Test / review:
+  - Links work for intended readers, actual sources/logs are available, secrets
+    are absent, deployment remains usable, and owner observes submission receipt.
+Acceptance:
+  - Technical completion, LLM survey and form submission each have real evidence.
+    Only the final receipt justifies marking course submission complete.
+
+OWNER DECISIONS D1-D7 - RECOMMENDATIONS APPROVED 2026-11-02
+-----------------------------------------
+The owner approved all seven recommendations on 2026-11-02. Original recommendation
+wording below is retained as the design record. New changes need review. Assignment-mandated
+fields, endpoints, Atlas and consistency rules are not optional design choices.
+
+D1. Application scope and structure
+  Recommend backend-only CommonJS, minimal route/service separation in Step 8,
+  a normal two-field GET /api service response, and /api/health for non-secret
+  DB readiness. No UI/auth/extra resource types.
+  Contract, OpenAPI and tests are engineering additions. Approve this scope.
+
+D2. Persistence and atomicity approach
+  Recommend Atlas dev/test/deployment databases and real transactions, shared
+  session/version-conflict guards and unique email index. Owner prepares Atlas
+  access privately. Alternative requires an equally proven no-partial-write
+  design; sequential saves with best-effort rollback are not the default.
+
+D3. Verification and manual tools
+  Recommend Node built-in tests + real HTTP integration + Postman collection.
+  Extra runtime test packages/MCP/Docker are unnecessary initially. Owner may
+  choose curl/another client instead; manual operations must remain reproducible.
+
+D4. Data/transport normalization
+  Recommend Step 4 defaults, trim nonempty required strings, preserve email case,
+  check basic email shape, deduplicate/canonicalize IDs, ignore unknown/server-
+  owned body fields; strict JSON types plus explicit form decoding, valid dates
+  without a future-only rule and without silent invalid-day rollover.
+  These policy details are not all explicitly fixed by the assignment.
+
+D5. Underspecified query/precedence behavior
+  Recommend count before pagination; explicit limit=0 unlimited; reject invalid
+  recognized collection parameters; ignore unknown keys; member URL target 404
+  precedes invalid select. Freeze this policy in contract/tests; ask course staff
+  about count/limit semantics if their expected behavior remains uncertain.
+
+D6. Successful DELETE response (grading ambiguity)
+  Recommend seek course clarification if available; otherwise approve the
+  provisional DELETE 200 + {message,data:[]} policy in Step 5. Alternative is
+  204 with an empty body if course guidance requires it. Existing files cannot
+  establish which status the unreleased grader expects. Approval is a design
+  decision under that uncertainty, not evidence of official acceptance.
+
+D7. Naming, language and documentation presentation
+  Recommend service label cs409-mp3-api; databases cs409_mp3_dev/test/prod;
+  unique QA-<runTag> fixtures; English API messages/contracts; English SOP as in
+  the owner's final MP2 preference, with Chinese conversational guidance.
+  Actual Render hostname/account/DB identifiers must be supplied or confirmed;
+  do not infer an account from the OS username or promise name availability.
+  Keep one maintainable SOP and CSV chat links; avoid permanent per-round reports.
+
+PRE-CODE PREPARATION CHECKLIST
+------------------------------
+Original planning checklist; current evidence is recorded in the dated updates:
+  [x] Owner reviewed SOP and approved D1-D7, including the provisional D6 policy.
+  [x] Owner explicitly authorized environment setup and the first execution round.
+  [x] Atlas dev/test account, cluster, DB user and names are usable; the
+      deployment name is reserved, with actual production access deferred.
+  [x] Real connection URI can be entered privately; test target is isolated.
+  [x] A clear owner-operated Dashboard plan exists in docs/setup.md. Actual
+      account/repository connection and service creation remain pending; no token
+      is mandatory. Owner confirmed no Render Web Service exists on 2026-11-03.
+  [ ] Manual client choice and actual chatlog sharing method are confirmed.
+After authorization, before feature coding:
+  [x] Node 24 / lockfile installation / environment files are actually verified.
+  [x] Atlas connection, index readiness and transaction commit/abort pass.
+  [x] Approved contract/OpenAPI/test scaffold is written and reviewed.
+  [x] Local test data ownership and cleanup checks are active.
+Can proceed alongside local implementation:
+  - Render service configuration and early smoke if access becomes available.
+  - Actual chat sharing/source recording and owner form preparation.
+  - Optional MCP connection; absence does not block the planned CLI/browser flow.
+
+RISK REGISTER - REQUIRED MITIGATION AND OBSERVABLE PROOF
+-------------------------------------------------------
+Risk                                 Mitigation / proof
+PUT accidentally behaves as PATCH    Normalize complete candidate; omitted-field
+                                     and required-field tests; no upsert.
+Mongoose silently casts wrong input  Validate raw normalized transport types;
+                                     JSON strings/numbers/arrays -> proper 400.
+Unique option mistaken for validator Real index ready; duplicate race -> one
+                                     success, one 400; no raw error leakage.
+Update validators skip missing paths Validate full replacement before writing;
+                                     do not rely on runValidators alone.
+Response contains old document       Assert response equals fresh committed GET;
+                                     use supported after-update return behavior.
+Name updated only on pending tasks   Query all tasks assigned to user; completed
+                                     task rename/delete tests.
+Completed task wrongly unassigned    Completion removes pending membership only;
+                                     completed transfer/reopen chain.
+Transfer duplicates/loses membership Shared transaction and $addToSet/$pull or
+                                     equivalent; invariant/race tests.
+Transaction is partly outside session Audit every participating query/write;
+                                     real rollback after first mutation.
+Transaction still reads stale state  Re-read/recompute, shared version guards;
+                                     rename/delete/assignment race tests.
+Retry sends duplicate response       Send response after commit only; retry has
+                                     no external side effects.
+Wrong 400/404 precedence              Contract cases combine target/field/ref
+                                     failures; malformed-body exception recorded.
+count="false" becomes true           Explicit JSON Boolean parsing, not truthiness.
+limit/default drops user records     101-item tests, user unbounded, tasks=100,
+                                     explicit zero/override and count tests.
+Projection breaks lookup/relationships Separate external select from internal
+                                     writes; test _id exclusion and selection.
+Query sanitizer destroys $in         Test documented operators and composed
+                                     Mongoose queries, including object IDs.
+Route duplicated or prefix doubled   Trace current router mount; one response
+                                     per method; /api applied once.
+Dates reset by replace/timestamps     Strip client date, preserve original date;
+                                     POST fake-date and PUT regression tests.
+Invalid dates normalize silently      Check invalid calendar components and
+                                     timezone-equivalent instants explicitly.
+Unrestricted test cleanup destroys data Explicit isolated TEST_MONGODB_URI;
+                                     delete run-owned IDs, never drop/wipe DB.
+Cloud reachable but DB unavailable   Startup/readiness plus real CRUD over HTTPS;
+                                     do not use TOKEN homepage as DB evidence.
+Node/dependency drift at deployment  Node 24 explicitly selected; npm ci; compare
+                                     actual runtime/lockfile, no old Node 20 gate.
+Grader URL has /api twice             submit.js receives origin; manual apiBase
+                                     includes /api; name variables distinctly.
+204 response loses JSON               D6 contract; 204 body must be empty;
+                                     inspect status AND actual bytes.
+Grader damages/leaves fixtures        Inspect returned feedback/known IDs; scope
+                                     cleanup; no repeated blind grader runs.
+False completion/document inflation   Separate plan/actual/owner/form states;
+                                     record real evidence and concise documents.
+
+APPENDIX A - REQUIREMENT / TEST / MANUAL TRACE MATRIX
+----------------------------------------------------
+Area / IDs          Implementation steps   Automated evidence       Manual
+DATA models/defaults 13,16,17               required/type/default/   M02-03,
+                                            date/replacement         M14-15
+HTTP ten operations  14,16,17,18            all statuses/body shape  M02-18
+QUERY all six        14                     combinations/operators/ M04,M16,
+                                            101 defaults/member      M20
+VALID precedence     13,16,17,19            400/404/mixed/own-email/ M16
+                                            malformed JSON/form
+REF two directions   15-18                  transition/invariant    M05-13,
+                                            checks                   M17-18
+ATOM no side effects 15,19                  snapshot/real abort/    M16,M20
+                                            concurrency races
+ENV runtime/Render   11,21,22               install/transaction/    M01,M19
+                                            current HTTP release
+SUB source/log/form  20,24                  file/source/link audit  owner
+
+Rubric mapping: 20% creation/validation -> DATA/VALID; 7.5% member select ->
+QUERY-03/08; 10% missing PUT -> HTTP-04/09 + VALID order; 27.5% consistency ->
+REF/ATOM; 15% task queries -> QUERY; 20% deletion -> HTTP-05/10 + REF cleanup.
+User queries, skip and every non-rubric rule still have explicit tests.
+
+APPENDIX B - OWNER MANUAL ACCEPTANCE GUIDE AND EXPECTED RESULTS
+---------------------------------------------------------------
+Availability: this is a future executable guide, NOT a record of tests already
+run. Round 1-2 use provided isolated fixtures where earlier POST endpoints do
+not yet exist. The complete sequence below applies after Round 3 and is rerun
+on the final Render release. Do not enter a MongoDB URI into Postman requests.
+
+Client preparation:
+  - Use Postman (recommended) or equivalent HTTP client. Browser address bars
+    cannot conveniently issue JSON POST/PUT/DELETE or inspect all response codes.
+  - apiBase = http://localhost:3000/api for local acceptance; switch to the
+    actual https://<deployed-host>/api for online acceptance. There is no invented
+    live address in this draft. Grader API_URL is instead the origin WITHOUT /api.
+  - Set runTag to a fresh value such as 20261102-01. Header Content-Type:
+    application/json for the main chain. Use the Params editor for query JSON;
+    let the client encode it rather than manually double-encoding the URL.
+  - Store returned data._id as A, B, C, T1...T5. Replace {{variable}} with your
+    client's environment syntax or actual returned string. Save dateCreated
+    from each creation for later exact comparisons.
+  - For every write inspect status + response JSON, then GET all affected
+    resources. pendingTasks comparisons are set comparisons; duplicates fail.
+
+Reusable bodies (replace the variables with real values):
+  User A creation:
+    {"name":"QA-{{runTag}}-A","email":"qa.{{runTag}}.a@example.com"}
+  User B creation:
+    {"name":"QA-{{runTag}}-B","email":"qa.{{runTag}}.b@example.com"}
+  T1 creation (T2/T3 use name suffix 02/03):
+    {"name":"QA-{{runTag}}-01","deadline":"2026-12-01T12:00:00.000Z"}
+  Task replacement helper (always provide name and deadline):
+    {"name":"QA-{{runTag}}-01","deadline":"2026-12-01T12:00:00.000Z",
+     "completed":false,"assignedUser":"{{A}}"}
+  User replacement helper (always provide name and email):
+    {"name":"QA-{{runTag}}-A","email":"qa.{{runTag}}.a@example.com",
+     "pendingTasks":["{{T1}}"]}
+  A missing optional assignedUserName is deliberately derived from the real user.
+  All main-chain expectations below assume approved defaults D4/D5 and the
+  provisional DELETE 200 policy D6. Update them if the owner/course chooses
+  another contract before development; no test should accept both silently.
+
+M01. Start and prove availability.
+  Later, in a terminal:
+    cd "/Users/a16594/Desktop/uiuc FA26/cs 409/mp3"
+    node --version
+    npm ci
+    npm start
+  Expected: Node 24.x; install exits successfully; server listens on configured
+  PORT and only declares readiness after DB connection. In another client GET
+  {{apiBase}}/health -> approved non-secret 200 readiness response. Missing DB
+  must not falsely report ready. Root TOKEN message alone is insufficient.
+
+M02. Create two users.
+  POST {{apiBase}}/users with the A body, then the B body. Expected: 201 each;
+  data contains correct name/email, _id, pendingTasks=[], server dateCreated.
+  Save A/B and dates. GET /users/{{A}} -> 200, same saved fields.
+
+M03. Create three tasks.
+  POST /tasks with T1/T2/T3 bodies, suffixes 01/02/03. Expected: 201 each;
+  description="", completed=false, assignedUser="", assignedUserName="unassigned";
+  deadline serializes as the supplied instant; creation dates are server-owned.
+
+M04. Prove scoped queries and selection.
+  GET /tasks with Params:
+    where  = {"_id":{"$in":["{{T1}}","{{T2}}","{{T3}}"]}}
+    sort   = {"name":1}
+    select = {"name":1,"_id":0}
+    skip   = 1
+    limit  = 1
+  Expected: 200; one object containing only name QA-<runTag>-02.
+  Set count=true with the same parameters -> data=3 under D5; count=false ->
+  the one-element array. Set an unmatched where -> [] or 0 with count=true.
+  GET /tasks/{{T1}} with select={"name":1,"_id":0} and where=NOT_JSON -> 200
+  with only T1 name; irrelevant member where is ignored. Do the equivalent user
+  list/member checks with A/B, name sorting, projection and an empty result.
+
+M05. Assign two pending tasks to A.
+  PUT /tasks/{{T1}} and /tasks/{{T2}} with each task's full replacement helper,
+  completed=false, assignedUser=A. Expected: 200; both carry A's name; fresh
+  GET A has exactly T1/T2 in pendingTasks. Dates remain unchanged.
+
+M06. Complete T2 while retaining its assignment.
+  PUT T2 with name/deadline, completed=true, assignedUser=A. Expected: 200;
+  T2 remains assigned to A; A.pendingTasks contains T1 only.
+
+M07. Reopen and complete again.
+  PUT T2 with completed=false and A -> A.pendingTasks contains T1/T2 exactly
+  once. PUT completed=true and A again -> contains T1 only, T2 stays assigned.
+
+M08. Rename A, including their completed task.
+  PUT /users/{{A}} with new name QA-<runTag>-A-renamed, original A email and
+  pendingTasks=[T1]. Expected: 200, unchanged dateCreated; both T1 AND completed
+  T2 have the new assignedUserName. A.pendingTasks remains [T1].
+
+M09. Reassign a completed task.
+  PUT T2 with name/deadline, completed=true, assignedUser=B. Expected: 200;
+  T2 belongs to B with B's name; B.pendingTasks stays []; A still has only T1.
+
+M10. Reopen the reassigned task.
+  PUT T2 with name/deadline, completed=false, assignedUser=B. Expected: 200;
+  B.pendingTasks=[T2]. This must not restore membership in A.
+
+M11. Move tasks through User PUT, then remove some.
+  PUT B with original B name/email, pendingTasks=[T1,T2,T3]. Expected: 200;
+  all three are assigned to B; A.pendingTasks=[]; no task is in both users.
+  PUT B again with pendingTasks=[T2]. Expected: T1/T3 become ""/"unassigned";
+  T2 remains B; B.pendingTasks contains T2 only.
+  PUT B with only its name/email, OMIT pendingTasks while T2 is still pending.
+  Expected: B.pendingTasks=[] and T2 becomes unassigned. This specifically proves
+  omission clears a nonempty pending list, rather than merely leaving [] alone.
+
+M12. Omit pendingTasks while retaining a completed assignment.
+  PUT T2 with completed=true, assignedUser=B -> B.pendingTasks=[]. Then PUT B
+  with name QA-<runTag>-B-renamed and its original email, OMIT pendingTasks.
+  Expected: pendingTasks=[]; T2 remains completed/assigned to B with the renamed
+  value. This also proves own-email retention and completed-task name propagation.
+
+M13. Exercise both POST relationship directions.
+  POST /users with C name/email using suffix c and pendingTasks=[T1]. Expected:
+  201; T1 now assigned to C; C.pendingTasks=[T1].
+  POST T4 with suffix 04, deadline, completed=false, assignedUser=A. Expected:
+  201; A.pendingTasks=[T4], correct renamed A name is derived.
+  POST T5 with suffix 05, deadline, completed=true, assignedUser=A and fake
+  dateCreated="2000-01-01T00:00:00.000Z". Expected: 201; assigned to A but absent
+  from pendingTasks; dateCreated is current server time, not year 2000.
+
+M14. Prove Task PUT defaults, not patch behavior.
+  PUT T3 with name/deadline, description="temporary", completed=true, assignedUser=A.
+  PUT T3 again with ONLY name/deadline and fake dateCreated="2000-01-01...Z"
+  (use the complete valid date string above). Expected: description="",
+  completed=false, assignment empty/unassigned; original dateCreated unchanged;
+  A.pendingTasks remains [T4]. Omitted assignment must not retain A.
+
+M15. Prove server ownership and persistence.
+  Fresh GET relevant users/tasks; compare saved _id/dateCreated. Try client _id
+  and dateCreated on an otherwise valid User PUT with its full pending list:
+  server-owned values remain unchanged under D4. For local persistence only,
+  restart the service and GET a saved ID; it still exists with the same state.
+  Do not restart the public service during a grader run.
+
+M16. Error matrix: snapshot A/B/C and T1-T5 before each negative request;
+  fresh GET afterward must match. Confirm a well-formed missingId by GET -> 404
+  before using it; do not assume a random example ID can never exist.
+  For each body-field case start from an otherwise valid COMPLETE body and
+  change only the stated field. Use A's current renamed name/email and [T4] for
+  a normal User replacement, or T3's name/deadline for a normal Task replacement.
+  Only intentionally omit a required field in a test explicitly testing omission;
+  otherwise an earlier 400 could conceal the reference behavior being tested.
+  Request / change                                  Expected
+  PUT /users/not-an-id with {}                       404 before missing fields
+  PUT /tasks/{{missingId}} with {}                   404 before missing fields
+  POST user missing email / name number              400
+  POST user malformed email address                 400 under D4 shape check
+  PUT existing task missing deadline / bad date      400
+  JSON task completed="false" (string)               400 under strict JSON D4
+  User pendingTasks="not-an-array"                   400
+  User pendingTasks=["bad-id"]                       400
+  User pendingTasks=[missingId]                      404
+  User pendingTasks=[T2] while T2 completed           400
+  User pendingTasks=[T1,missingId]                    404; T1 stays with C
+  Task assignedUser="bad-id"                         400
+  Task assignedUser=missingId                        404
+  Task assignedUser=A, assignedUserName="wrong"       400
+  PUT B with A's email and otherwise valid fields    400; references unchanged
+  POST /tasks malformed JSON such as {"name":        400 safe JSON envelope
+  GET collection where={invalid                     400 safe JSON envelope
+  GET collection skip=-1 or limit=1.5                400 under D5
+  GET /tasks/{{missingId}}                           404, not [] and not 500
+  Every error has human-readable message and data={}; no stack/cast/DB detail.
+  Also try a URL-encoded valid task with completed=false and encoded pending
+  array in a User request: declared form decoding works; wrong literals fail.
+  Use disposable records and preserve the main chain's state for deletion below.
+
+M17. Delete a pending task and a user with both task states.
+  DELETE /tasks/{{T4}} -> chosen D6 success (default 200 envelope); GET T4 ->404;
+  A.pendingTasks=[]; completed T5 still assigned to A. DELETE T4 again ->404.
+  Assign T3 to B as incomplete using full Task PUT; B.pendingTasks=[T3].
+  DELETE /users/{{B}} -> chosen success; GET B ->404. T2 (completed) AND T3
+  (pending) still exist with assignedUser="", assignedUserName="unassigned".
+  DELETE B again ->404; other users/tasks retain their state.
+
+M18. Clean up only this run's remaining records.
+  DELETE C -> T1 remains but is unassigned; DELETE A -> T5 remains but is
+  unassigned. Delete T1/T2/T3/T5 by saved ID. All these member GETs ->404.
+  Scoped where queries using this run's IDs ->200 with []; scoped count ->0.
+  Never delete the whole collection or records created by other runs/students.
+
+M19. Repeat on the actual deployed origin and self-check.
+  Set apiBase to deployed origin + /api and repeat M02-M18 with a NEW runTag.
+  Verify current release and HTTPS; cold-start wait is allowed, silent failure
+  is not. In submit.js API_URL is that origin WITHOUT /api. npm run submit
+  prints a real score and item feedback; preserve the report, respect limits.
+  The grader run does not submit the course form. Owner checks log-link coverage,
+  actual form fields/LLM survey and the final submission confirmation separately.
+
+M20. Inspect automated-only guarantees from a user-run command.
+  After implementation, in a second terminal run the actual documented commands:
+    npm test
+    npm run test:integration
+    npm run check
+  Expected: all approved suites exit 0 with their actual reported case count;
+  integration uses isolated test URI and cleans owned fixtures. Review named
+  results for 101-task default=100, 101-user default=101, count-before-pagination,
+  forced transaction rollback and concurrent transfer/rename/delete races.
+  These guarantees cannot be proved by visually inspecting one normal request.
+  If scripts differ from these proposals, the delivered guide must be updated
+  to actual package.json commands before asking for owner acceptance.
+
+LLM EXECUTION-SPECIFIC REQUIREMENTS - SEPARATE DISCLOSURE
+--------------------------------------------------------
+Observed project-specific files:
+  - At the initial planning inspection, MP3 contained no AGENTS.md, .agents/.codex task file,
+    separate LLM prompt, chatlog file, or hidden LLM-only implementation test.
+    This is an inspection finding, not a claim about undisclosed grader tests.
+  - README.md:219-223 is the explicit course LLM policy: when LLMs generate MP
+    code, submit chatlogs with source and answer the grading-form LLM survey.
+    The course states failure is an academic-integrity violation.
+  - README's individual-work and declared-source rules still apply; its LLM
+    policy explicitly permits experimentation with generated MP source code.
+  - The supplied materials do not mandate MCP, agent delegation, CSV vs Markdown,
+    a SOP language, OpenAPI, or per-round acceptance-report files.
+Owner instructions for the original planning turn (historical; development is now authorized):
+  - This conversation is planning/documentation only. Wait for next-round owner
+    review and authorization before environment changes or implementation.
+  - Review the finished plan against actual code as the highest-confidence
+    structural/runtime baseline; do not discard target requirements merely
+    because starter code has not implemented them.
+  - Every step needs test/acceptance; provide an owner-operated final guide;
+    list custom decisions for approval. Do not invent completed evidence.
+Continuity preferences, not new course rules:
+  - English maintainable repository SOP and actual chat-share links in CSV.
+  - Source declarations track actual materials consulted; logs exclude secrets.
+  - No agent delegation or external account change is implied by this SOP.
+
+POST-DRAFT REVIEW AGAINST ACTUAL CODE, README AND FAQ
+----------------------------------------------------
+Status: COMPLETED for this planning draft on 2026-11-02.
+This review records the original planning turn before Round 1 source changes;
+the current implementation/update and its acceptance state appear below.
+Method: re-read the finished draft against the actual server/router/model,
+package manifests/lockfile, grader script, and README/FAQ behavior tables;
+check step/decision/manual-guide structure and original-file hashes.
+
+Findings and corrections incorporated:
+  1. Preserve the CommonJS service and one /api route mount; no Vite, front-end
+     build, Pages workflow or inherited Node 20 gate is planned.
+  2. Use actual locked Express 5.3.0/Mongoose 9.11.1, not their package.json
+     minimum ranges or the later patches displayed by live documentation.
+  3. Preserve start/dev/submit scripts. All test/check scripts, Task model,
+     health endpoint and contract artifacts are explicitly proposed additions.
+  4. mongoose.connect is still commented; GET /api reads TOKEN and has no data
+     field. Neither is treated as completed DB connectivity or a compliant API.
+  5. Existing engines >=24 is recorded accurately; an explicit Node 24 bound/
+     deployment pin is a proposed compatibility change, not current behavior.
+  6. Both body parsers exist. Keep both, with explicit form decoding and raw JSON
+     type checks so Mongoose coercion does not defeat required 400 responses.
+  7. PUT resets omitted optional business fields but retains _id/dateCreated.
+     The manual chain now explicitly tests omission clearing a NONEMPTY user
+     pending list, as well as Task optional resets and immutable dates.
+  8. URL-id 404 precedes parsable-body validation; nonexistent body references
+     are 404, malformed body IDs are 400, and list misses remain 200/[] or 0.
+     The guide now requires otherwise valid full bodies to avoid masked tests.
+  9. README's general priority and FAQ's detailed table are reconciled: fetched
+     completion/name checks occur after existence resolution; parser failures
+     necessarily happen before semantic body checks. Mixed cases are tested.
+ 10. Renaming/deleting users queries ALL assigned tasks, including completed;
+     completion retains ownership; completed-task reassignment is permitted.
+ 11. User/Task POST relationship effects and task transfers are included, not
+     only PUT cascades. Both deletion directions and failed-write snapshots exist.
+ 12. Query defaults/combinations use Mongoose; member GET ignores irrelevant
+     malformed queries. 101-item fixtures prove task/user default differences.
+ 13. No-partial-change is required; transactions are the proposed mechanism.
+     Failure injection and shared-resource version/conflict tests verify the
+     mechanism rather than assuming a transaction label proves correctness.
+ 14. Lightweight email shape checking, invalid-calendar checks, trimming, ID
+     deduplication, count pagination and limit=0 are visibly proposed policies;
+     they require D4/D5 approval and are not misrepresented as explicit rubric.
+ 15. DELETE 200 vs 204 remains unresolved by actual files. It is preserved as D6;
+     a user-approved fallback is not presented as guaranteed grader behavior.
+ 16. API_URL is a deployment origin, the grader adds /api, and submit.js retains
+     its grader address/timeout. No video/initial-data or actual form-field claim
+     was inherited from MP2. Technical, owner and form completion remain distinct.
+
+Review conclusion:
+  - The plan matches the inspected starter architecture and includes the target
+    requirements that are currently absent. No code modification was needed.
+  - The 24-step Actions/Test/Acceptance structure, seven pending decisions and
+    twenty manual sections passed document-structure checks. These checks are
+    documentation verification, not a runtime test or a prediction of the score.
+  - All twelve original tracked files are unchanged. Only SOP.txt is delivered;
+    .env/node_modules remain absent. Runtime/cloud/owner acceptance is pending.
+  - Remaining uncertainty is explicit in D4-D6. Nothing is marked implemented,
+    deployed, graded or submitted merely because it appears in this plan.
+
+ROUND 1 IMPLEMENTATION / ACCEPTANCE UPDATE (2026-11-02)
+--------------------------------------------------------
+- Owner authorization: SOP review passed; D1-D7 approved; Round 1 authorized.
+- Code scope: CommonJS app/server separation, DB-aware startup, safe readiness,
+  complete User/Task schemas, shared body/query validation, safe errors/CORS,
+  and User/Task collection/member GET. No public write/seed/fault endpoints.
+- Contract artifacts: docs/api-contract.md, docs/openapi.yaml (JSON-compatible
+  YAML 1.2), read-only Postman collection and docs/manual-acceptance.md.
+- Environment: Node 24.20.0, bounded engines, two runtime pin files, ignored
+  private .env skeleton, explicit separate test URI and safe DB/fixture tools.
+- Dependency change is evidence-driven: initial audit reported four findings.
+  Express 5.3.0 / Mongoose 9.11.1 / dotenv 17.4.2 are preserved; compatible
+  transitive fixes use body-parser 2.4.0 and qs 6.17.1. Node's native watch
+  preserves npm run dev while removing the vulnerable nodemon/minimatch chain.
+  No forced audit fix, framework migration or unrelated dependency upgrade.
+- Local tests distinguish pure/model/query construction and actual loopback
+  HTTP transport using doubles. They are not real MongoDB query acceptance.
+- Atlas gate: db:probe and test:integration require private development/test
+  URIs and actual successful runs. Missing configuration must fail, not skip.
+  Integration tests contain 101-item limits/counts, real projections/operators,
+  unique-index race and commit/abort proof, deleting only their own IDs.
+- Manual guide uses the developer fixture CLI because POST endpoints belong
+  to later rounds. Its two-user/three-task state is explicitly documented;
+  do not apply the future full POST-based SOP chain to an incomplete first round.
+- Source/LLM records: actual sources recorded; llm_logs.csv has only a header
+  until a real current conversation link is available. It is not a finished log.
+- Round 1 is NOT fully accepted while Atlas/runtime/fixture checks remain
+  unexecuted. Render and final grader/form completion remain later work.
+
+Historical verification on 2026-11-02 (superseded by the rerun below):
+  - npm ci: success; 84 packages installed / 85 audited; zero vulnerabilities.
+  - npm run check: success; 21 JavaScript syntax checks, ten target operations,
+    local OpenAPI references/schemas and 13 Postman script syntax checks;
+    all 61 pure/model/query/loopback HTTP transport tests passed, zero skipped.
+  - db:probe: exit 1 because development/test URIs were still blank. No actual
+    database probe operation was executed; connection/transaction proof pending.
+  - test:integration: exit 1 at the explicit missing-MONGODB_URI guard; its real
+    database subcases were not executed. This is not a passing/skipped suite.
+  - README.md, FAQ.md, LICENSE and submit.js match their initial hashes;
+    git diff --check passed; .env and .local fixtures are ignored.
+  - No development server is left running, no real fixtures were created, and
+    no Render service or grader run is claimed. Fill both private URI values,
+    then rerun the probe/integration suite and manual guide to finish Round 1.
+  - Owner clarified that no Atlas cluster has been created yet. docs/setup.md
+    now contains verified first-cluster Free/M0, database-user, network-access
+    and driver-URI instructions. Owner completes account/credential steps, then
+    the existing probe/integration/manual checks resume; no feature rebuild is
+    needed just to supply the missing environment values.
+
+ROUND 1 DATABASE / RUNTIME VERIFICATION (2026-11-03, America/Chicago)
+--------------------------------------------------------------------
+- Owner confirmed the private .env configuration is complete. Both URI values
+  are present, have explicit distinct application database paths, use SRV and
+  the same cluster, and have no inherited shell override. PORT validates as
+  3000. The .env file remains mode 0600 and ignored by Git; no credential or
+  full URI is recorded here or printed by these checks.
+- npm run db:probe: exit 0. Development and isolated test databases both passed
+  ping, unique-email index readiness, real transaction commit and intentional
+  abort. Probe-owned temporary documents were removed.
+- npm run test:integration: exit 0, 12 reported tests passed (one parent plus
+  11 substantive subtests), zero failed/cancelled/skipped. Real MongoDB evidence
+  includes filters/operators/date casts, all six query parameters together,
+  projection, count before pagination, 100/101 task limits, unlimited users,
+  member/error precedence, a duplicate-email race and immutable creation dates.
+- npm run check: exit 0; 21 JavaScript syntax checks, ten target contract
+  operations/local OpenAPI references and 13 Postman script syntax checks;
+  all 61 pure/model/query/loopback transport tests passed, zero skipped.
+- Actual server.js processes were started twice on temporary local ports using
+  the configured development database. Readiness returned 200/ready=true.
+  All 13 URLs/methods from the documented collection returned the expected
+  response data/status, including 400, 404 and bodyless OPTIONS 204 with CORS.
+  This was an automated HTTP replay, not a Postman UI run or owner acceptance.
+- Two users and three tagged tasks were created transactionally in development.
+  After stopping and starting a separate application process, user/task data
+  and creation dates were unchanged. Transactional cleanup removed only these
+  fixture IDs; original resource counts were preserved and removed members
+  returned 404. Temporary application processes were stopped.
+- No runtime source or .env modification was needed. The prior missing-Atlas
+  technical blocker is resolved. Round 1 technical verification is complete;
+  the owner's manual read acceptance, later write/relationship/concurrency
+  rounds, Render, grader and course submission remain separate pending work.
+
+ROUND 2 IMPLEMENTATION / ACCEPTANCE UPDATE (2026-11-03, America/Chicago)
+------------------------------------------------------------------------
+Owner authorization: continue to the next SOP execution batch after the resolved
+Atlas blocker. Scope is Steps 15-16, on the technically verified Round 1 baseline.
+
+Implementation:
+  - Public Task POST returns 201; full Task PUT returns 200. Shared validation
+    enforces URL-target / field / reference-existence / fetched-name order.
+    Complete candidate fields reset omitted optionals; identity/date remain
+    server-owned; JSON and URL-encoded Booleans remain distinct until decoding.
+  - lib/relationships.js centralizes same-session sequential snapshot reads,
+    majority writes/commit, persisted __v guards/increments, 15-second driver
+    transaction timeout/retry budget and five-second commit limit. Supported
+    retries re-read and recompute; handlers send one result only after commit.
+  - Task assignment, transfer, complete, completed transfer, reopen and unassign
+    synchronize both resources. Every touched owner is really version-written,
+    including completed ownership with unchanged pendingTasks.
+  - Internal User create/replacement/rename and both delete operations share the
+    same service so rename/delete/assignment races can be proved in Step 15.
+    Their HTTP routes are intentionally left for the Round 3 checkpoint.
+  - Constructor-only test hooks inject failures after actual database writes or
+    pause before writes for deterministic races. There is no HTTP/env fault
+    control or process-local concurrency lock.
+  - The existing OpenAPI/readable contract and manual guide reflect six public
+    resource operations. The same Postman collection now contains 36 requests:
+    13 initial read/CORS cases plus 23 Task-write/inspection cases.
+  - Developer fixture cleanup accepts repeated explicit --task-id ID arguments
+    for this run's newly created tasks. It checks run-name/ID ownership and
+    refuses relationships beyond the supplied set before deleting anything.
+    No environment values, dependencies, course docs or grader settings changed.
+
+Final verification in the actual mp3 directory (all commands exit 0):
+  - npm run check: 26 JavaScript syntax checks, ten target / six implemented
+    resource operations, local OpenAPI references/schemas, and 37 script syntax
+    checks for 36 Postman requests; all 64 local tests passed, zero skipped.
+  - npm run test:integration: all 35 reported tests passed, zero failures,
+    cancellations or skips (two parents plus 33 substantive subtests: 11 read
+    and 22 Round 2 cases). Each suite uses the isolated Atlas test target.
+    Cases include exact error priority, complete replacement/defaults, immutable
+    dates, raw/form types, full failure snapshots including __v, rollback after
+    actual user write and task insertion, explicit same-session command audit,
+    unique-email race, same-task transfers, completion/transfer, two tasks for
+    one user, and deterministic completed assignment vs user rename/deletion.
+    A forced HTTP retry commits exactly one Task with the recomputed user name.
+  - Actual developer fixture CLI and separate server.js processes in development:
+    all 36 documented request URLs/methods and 122 embedded test assertions
+    passed through automated HTTP/VM replay. This is not a Postman UI run.
+  - A POST-created task and its user's pending state survived a separate process
+    restart with unchanged data and creation date. Explicit --task-id cleanup
+    removed only owned original/new fixtures and their manifest; original user/
+    task counts were preserved and removed members returned 404.
+  - Private .env content was hash-checked unchanged. No application process or
+    fixture manifest from verification remains. Test cleanup uses owned IDs;
+    no database/collection wipe, production target or remote grader was used.
+  - README.md, FAQ.md, LICENSE, submit.js and both dependency manifests match
+    this round's starting hashes. Dependencies and environment were retained.
+
+Post-implementation review against actual code, README/FAQ and frozen contract:
+  - Four GETs plus Task POST/PUT are mounted once under /api; OpenAPI/manual
+    status does not claim the internal User/delete service methods are public.
+  - PUT normalizes every business field; target re-read precedes validation;
+    reference existence precedes name checking; client identity/date/version/
+    operator fields cannot reach database updates. Real failure snapshots pass.
+  - Participating service reads/writes use one explicit session sequentially;
+    guarded increments are real writes even for completed ownership. Supported
+    retries recompute rather than replay cached state; HTTP responds after commit.
+  - Read query behavior still executes in Mongoose; all first-round integration
+    regressions pass. Fixture cleanup cannot silently delete unlisted relations.
+  - No new design decision supersedes approved D1-D7. The transaction budgets
+    are bounded implementation settings, not additional assignment constraints.
+
+Round 2 technical verification is complete. Owner manual acceptance remains
+pending: follow docs/manual-acceptance.md with fresh fixtures, the current
+collection and the recorded createdTask ID for cleanup. Round 3 adds public
+User POST/PUT and both DELETE methods, with their dedicated HTTP error matrix.
+Later full stress/deployment/grader/submission checkpoints remain unaccepted.
+
+ROUND 3 IMPLEMENTATION / ACCEPTANCE UPDATE (2026-11-03, America/Chicago)
+------------------------------------------------------------------------
+Owner authorization: proceed to the next staged development/testing batch.
+Scope is Steps 17-18, following the verified Round 2 transaction/Task baseline.
+
+Implementation:
+  - Public User POST (201) and full User PUT (200) reuse the existing shared
+    transaction service. They validate required/raw types, email uniqueness
+    excluding self, reference existence and completed pending state in order.
+  - User POST/PUT transfer tasks from prior owners, normalize/deduplicate IDs,
+    replace a nonempty pending list with [] when omitted, preserve dateCreated,
+    and rename ALL assigned tasks including completed ones.
+  - Both DELETE HTTP methods reuse the same guarded transaction service.
+    Approved provisional D6 is 200 JSON {message,data:[]}; missing/malformed or
+    repeated targets are 404. Task deletion removes pending membership. User
+    deletion retains/unassigns pending and completed tasks.
+  - No transaction algorithm rewrite was necessary; constructor-only hooks
+    prove rollback after actual inserts, ownership updates, cleanup writes and
+    resource deletion. Real HTTP rename/delete vs assignment races are covered.
+  - The existing Round 2 database-world fixture/invariant/snapshot helper is
+    extracted for reuse by Round 2 and Round 3 suites; cleanup uses owned IDs.
+  - OpenAPI and the contract now describe ten implemented resource methods.
+    The existing Postman collection has 69 staged requests: 13 read/CORS,
+    23 Task-write/inspection and 33 User-write/delete cases. The manual guide
+    includes per-step results, fresh fixture setup, creation/restart checks and
+    cleanup if the owner stops before new Users C/D have been deleted.
+  - Dependencies, private environment, course README/FAQ/license and grader
+    settings are unchanged. No Git, Render or submission action is implied.
+
+Final verification in the actual mp3 directory (all commands exit 0):
+  - npm run check: 31 JavaScript syntax checks, ten target/implemented resource
+    operations, local OpenAPI schemas/references and 72 script syntax checks for
+    69 collection requests. All 67 local tests passed, zero skipped.
+  - npm run test:integration: all 57 reported tests passed, zero failures,
+    cancellations or skips (three parents plus 54 substantive subtests: 11 read,
+    22 Round 2 and 21 Round 3 cases). All use the isolated Atlas test target.
+  - New HTTP evidence includes raw/form User fields, exact error precedence,
+    own-email retention, duplicate-email POST/PUT races, User POST transfers,
+    complete pending-list replacement, completed-task rename, both DELETE paths,
+    repeated/malformed/missing target 404s and full rejected-write snapshots.
+  - Fault hooks ran after real old-owner writes, new User insertion, task
+    assignment/rename writes, pending cleanup, actual Task deletion and actual
+    User deletion. Every failed HTTP request returned safe 500 and restored all
+    prior fields, versions, resources and references. Session/guard audit passed.
+  - Deterministic real HTTP completed Task POST vs User rename/deletion races
+    returned recomputed current name or clean 404, with no duplicate task or
+    dangling reference. Concurrent User transfer vs Task deletion also passed.
+  - Actual developer CLI plus separate server.js processes in development:
+    all 69 documented requests and 234 embedded assertions passed automated
+    HTTP/VM replay. This is not a Postman UI run or owner manual acceptance.
+  - User POST data survived an immediate separate-process restart. The final
+    Task/deletion/cleanup state also survived restart: deleted Users C/D and
+    Task2 stayed 404; completed Task3 survived unassigned with its original date.
+  - Explicit-ID CLI cleanup removed only owned surviving original/new fixtures,
+    with the original database counts preserved and manifest removed. Temporary
+    application processes stopped; .env content was hash-checked unchanged.
+
+Post-implementation review against actual code, README/FAQ and frozen contract:
+  - One /api mount now exposes precisely all ten required resource operations;
+    controller result/status/body matches the existing service and D6 policy.
+  - User PUT cannot act as PATCH/upsert. Required fields and all pending IDs are
+    normalized before writes. Own email is excluded from duplicate checks;
+    missing refs precede completed-state errors. Names propagate to completed
+    tasks while completion and creation dates remain unchanged.
+  - Both deletions use the same session/guards, not new sequential bare writes.
+    User deletion retains tasks; failed cleanup restores the deleted resource
+    itself as well as references. Constructor-only hooks remain inaccessible
+    through HTTP inputs/environment settings.
+  - Round 1 query and Round 2 mutation regressions passed after extracting only
+    their common test-world helper; no transaction algorithm rewrite was needed.
+  - OpenAPI, readable contract, 69-request manual sequence and early-stop cleanup
+    instructions match actual routes. Original course files, runtime dependency
+    manifests and database configuration code match this round's starting hashes.
+  - D6 remains approved provisional 200/JSON, not claimed official grader proof.
+    No new decision overrides D1-D7; no production/deployment/grader/form action.
+
+Round 3 technical verification is complete. Owner manual acceptance remains
+pending. Round 4 is the complete risk matrix/release-candidate review; broader
+stress, deployment/grader/form checkpoints remain separate pending work.
+
+ROUND 4 RISK MATRIX / LOCAL RELEASE UPDATE (2026-11-03, America/Chicago)
+-----------------------------------------------------------------------
+Owner authorization: next SOP batch, Steps 19-20. No deployment, remote grader,
+Git publication or form submission is part of this local release gate.
+
+Confirmed defect and fix:
+  - RED: new real HTTP regressions showed 500 instead of 400 for empty select
+    paths, parent/child projection collisions and empty sort paths. Native
+    diagnostic categories were Mongo codes 40352 / 31249 and MongooseError.
+  - Shared query parsing now checks nonempty/NUL-free path components, conflicting
+    projection paths and MongoDB reserved/positional restrictions before query
+    execution, including count=true. Valid nested/ending positional/DBRef field
+    spellings remain accepted; member target lookup still precedes select errors.
+  - Actual MongoDB projection documentation and installed/observed behavior were
+    the baseline. No broad remapping of real infrastructure failures to 400,
+    post-fetch query implementation or additional resource field whitelist.
+
+Risk / evidence map (all earlier tests remain regression gates):
+  DATA/full replacement/dates -> unit validation; Task/User integration and
+    R01-R23/U01-U22. Strict raw/form decoding and ignored server-owned inputs.
+  HTTP ten operations/JSON/status -> HTTP unit and actual collection replay;
+    D6 is still approved provisional 200 JSON, OPTIONS 204 has no body.
+  QUERY/operators/projection/defaults -> reads + query-boundaries; all 64 subsets
+    for each resource (128 total), 101-item default/page tests, recognized JSON,
+    unknown/member-noise handling and Q01-Q06 path regressions. Unsorted results
+    are checked by size/content, without assuming MongoDB natural ordering.
+  VALID -> prior exact URL/field/email/ref/completion/name priority and full
+    before/after snapshots. Query count still validates otherwise unused inputs.
+  REF -> independent world invariant checker after mutations and controlled
+    stale-snapshot scheduling. Prior owner names/membership are recomputed.
+  ATOM -> transaction-boundaries discovers six real successful mutation paths
+    and faults each observed write position: 2/3/4/5/2/3 = 19 positions for
+    Task POST/PUT, User POST/PUT, Task DELETE and User DELETE respectively.
+    Full documents/versions and ended same-session state are checked on error.
+  Stale/late assignments -> relationship-races gates before the first write,
+    commits the competing operation, then resumes. Includes same-task transfer,
+    two tasks/one user, completion/transfer, User rename/delete/clear pending
+    after a task-list read, Task deletion after transfer, completion after a
+    reference check, uniqueness after its precheck, and missing-version guards.
+  ENV actual disconnection -> availability connects/pings a separate real Atlas
+    client, closes only that client, and verifies readiness 503 plus ten safe
+    resource-operation 500 responses; the original database snapshot is retained.
+  SOURCE/reproducibility -> existing npm ci/check/integration gates, protected
+    source hashes, private-file Git ignore checks and runtime source fingerprint.
+  ONLINE/SUB -> deliberately pending Render/current revision/HTTPS, real grader,
+    owner manual final acceptance, readable chatlogs and owner course form.
+
+Reproducible install already performed in the actual mp3 directory:
+  npm ci exit 0; 84 packages installed / 85 audited; zero vulnerabilities.
+  Existing package/lock versions retained; no forced upgrade or build added.
+Final complete actual-directory verification (all commands exit 0):
+  - npm run check: 35 JavaScript syntax checks, ten target/implemented resource
+    operations, local OpenAPI references/schemas and 78 script syntax checks for
+    75 collection requests. All 79 local tests passed, zero skipped.
+  - npm run test:integration: all 86 reported tests passed, zero failures,
+    cancellations or skips. This is six grouping parents, 79 substantive
+    subtests and one standalone real-disconnection test (80 actual scenarios).
+    It includes all previous rounds plus the 128 query parameter subsets,
+    path regressions, 19 rollback positions, controlled competing commit orders,
+    ended same-session assertions and guarded missing-version initialization.
+  - Actual CLI/server.js process replay: all 75 requests and 252 embedded test
+    assertions passed using automated HTTP/VM execution, not a Postman UI run.
+    User/Task data, dates and deletion/unassignment state survived separate
+    application processes. Explicit-ID cleanup retained original database counts,
+    removed the owned manifest and left no verification server running.
+  - Runtime verified: Node v24.20.0, Mongoose 9.11.1, MongoDB driver 7.7.0.
+    Reproducible install did not alter package.json/package-lock.json. No new
+    dependency, forced audit upgrade, build pipeline or environment setting.
+  - Intended artifacts match reviewed staging. README.md, FAQ.md, LICENSE,
+    submit.js and DB configuration code match round-start hashes; git diff
+    --check passed. Private .env stays mode 0600, ignored/untracked and content-
+    unchanged by the replay; node_modules and .local remain ignored/untracked.
+    The 20-file runtime fingerprint below matches the actual directory.
+
+Post-implementation release review:
+  - The shared path parser corrects the reproduced 500/400 query defect before
+    both find and count; current member-target precedence is preserved. Real
+    infrastructure errors remain safe 500. No regression in documented operators,
+    projection exceptions, parameter combinations or 100/unlimited defaults.
+  - The actual app/server/model/router/transaction flow remains the integration
+    baseline. No business mutation rewrite was needed. All contract/rubric areas
+    map to concrete tests above and in docs/api-contract.md; no required local
+    area is omitted from the trace. Listed cloud/submission rows remain pending.
+  - Guarded sequential same-session operations, post-commit responses, completed
+    ownership, all-task rename/delete handling, full replacement and immutable
+    dates were reviewed against actual code before README/FAQ expectations.
+  - Constructor-only fault/race hooks remain unavailable to HTTP/environment
+    inputs. All test data is scoped to owned IDs in the designated test database;
+    the availability test closes its own client only. No database/collection wipe.
+  - The current manual guide/75-request collection includes the repaired query
+    cases and early-stop cleanup. A single maintainable SOP/contract is retained;
+    no extra per-round report or invented share/score/submission record.
+  - D1-D7 remain in force. D6 is still provisional until actual course/grader
+    evidence. The new field checks enforce MongoDB-native query validity and
+    do not add a resource-field whitelist or arbitrary list/pagination cap.
+
+Round 4 local technical acceptance is complete: a reproducible local runtime
+candidate exists. This is evidence for the listed cases, not an exhaustive proof
+of every possible input/interleaving. Owner manual acceptance and all actual
+Render/current-release/HTTPS, grader, chatlog and form checks remain pending.
+Next planned batch is Round 5 (Steps 21-24), with those external inputs/gates.
+
+ROUND 5 API ACCEPTANCE / DEPLOYMENT PREPARATION (2026-11-03)
+-----------------------------------------------------------
+Owner authorization: continue Steps 21-24, emphasizing the three requirements,
+meaningful regression tests, remaining steps and an owner-operated guide.
+Owner clarified no Render Web Service has been created; configuration guidance
+is needed. This is a real external prerequisite, not a reason to skip independent
+preparation or to fabricate a hostname, deployed commit or grader score.
+
+Review against actual code (highest-confidence implementation baseline):
+  - QUERY: lib/query.js parses all six recognized collection arguments; routes
+    use Mongoose for where/sort/select/skip/limit/count, with count before paging.
+    Actual reads/query-boundaries evidence covers 128 subsets, 101-item defaults,
+    Mongo operators, member projection/precedence and prior RED path regressions.
+  - RESPONSE/VALIDATION: lib/validation.js rejects wrong raw JSON types before
+    Mongoose coercion; form Booleans/arrays decode explicitly. Shared HTTP mapping
+    gives safe common envelopes and parser/field/reference/duplicate precedence.
+    Rejected writes compare full linked-resource snapshots including __v.
+  - REF/ATOM: lib/relationships.js uses sequential operations in one real session,
+    transaction-local re-reads/recomputation on retries and persisted __v guards.
+    User rename/delete queries all assigned tasks, including completed ones;
+    completion retains ownership but excludes pending membership. Independent
+    invariants, 19 real fault positions and controlled stale-read commit orders
+    support the listed behavior. This is not a proof of every possible input/race.
+  - No new defect in those business modules was established by this review.
+    Those modules, schemas, routes, server and dependency lockfile are unchanged
+    this round; no unnecessary business rewrite or dependency was introduced.
+
+Concrete preparation gap and delivered change:
+  - The old collection depended on a private local _dev fixture CLI; changing
+    apiBase alone did not provide equivalent Render fixtures/cleanup.
+  - scripts/acceptance.js now prepares exactly five fresh fixtures through real
+    POSTs, replays the same reviewed 75 requests/252 pm assertions, and cleans
+    only this UUID run's resources through ID-specific APIs. No dotenv, direct
+    DB credentials, extra runtime package or public seed/fault endpoint.
+  - Commands: acceptance:prepare -- --origin URL; acceptance:run -- --origin URL;
+    acceptance:clean. An origin excludes /api; remote requires HTTPS, credentials/
+    paths/query/fragment/redirects are refused. Explicit loopback HTTP is allowed.
+  - A private ignored manifest records the target/tag before the first POST;
+    creations with lost/unsaved responses remain discoverable. A fresh prepare
+    refuses an existing manifest; replay refuses an already-used fixture set.
+    CLI locking prevents overlapping local acceptance commands.
+  - Cleanup preflights owned names/emails and both link directions before the
+    first delete; foreign references refuse without mutation. It retains the
+    manifest on failure and confirms deleted members 404 and run-scoped lists [].
+    Stop other manual writes during cleanup; separate HTTP requests do not add
+    a new multi-request transaction guarantee. No drop/wipe/unscoped deletion.
+  - docs/setup.md fixes the exact Dashboard settings and private production-DB/
+    outbound-network procedure. The actual health message is Ready (not OK),
+    verified against routes/home.js. No invented nested root directory/host.
+  - docs/manual-acceptance.md section 0 provides fresh API-only local/online
+    setup, exact Postman variables/order, meaningful checkpoints, three extra
+    negative-body tests, persistence, failure capture and safe partial cleanup.
+    The original 75 requests remain unchanged in behavior; only the collection
+    description changes. No permanent per-round report file was added.
+
+Meaningful new regression acceptance (not a mocked DB test):
+  - tests/integration/http-acceptance.test.js: real Atlas and real HTTP for the
+    75-request flow, an unsaved/manual-created ID with an unchanged foreign
+    sentinel, and a foreign assignment that refuses cleanup before any deletion.
+    The refusal compares all fields/versions, then restoration and retry clean.
+  - tests/unit/acceptance.test.js: invalid/credential/path/plaintext remote origins
+    must fail before any request; explicit HTTPS and loopback remain usable.
+  - Existing query/validation/rollback/race/availability suites remain required;
+    the HTTP replay provides a user workflow check, not a substitute for them.
+
+Final Round 5 verification in the actual mp3 directory (all exit 0):
+  - npm ci: 84 installed / 85 audited, zero vulnerabilities; lockfile unchanged.
+  - npm run check: 38 JavaScript syntax checks, ten target/implemented operations,
+    OpenAPI references/schemas, 78 scripts for 75 Postman requests; all 81 local
+    tests passed, zero failures/cancellations/skips.
+  - npm run test:integration: all 90 reported tests passed, zero failed/cancelled/
+    skipped, about 146 seconds. Count includes seven grouping parents, 82
+    substantive subtests and one standalone availability case (83 scenarios).
+    The 128 query subsets and 19 fault positions remain part of those scenarios.
+  - Actual server.js child + delivered CLI commands: acceptance:run passed all
+    75 requests / 252 assertions and cleanup. A separate acceptance:prepare,
+    manual-style POST without saving its ID, and acceptance:clean also passed.
+    All original development documents/fields/versions match their initial
+    snapshot; private .env content is unchanged, mode 0600, ignored/untracked.
+    Both API/legacy fixture manifests and CLI lock are absent; server stopped.
+  - README.md, FAQ.md, LICENSE, submit.js, package-lock.json, models, routes,
+    server and business query/validation/relationship modules are unchanged
+    from the round start. Intended files match the reviewed changes; git diff
+    --check passed. No runtime dependency added. Only package.json scripts
+    change among the 20 runtime fingerprint entries.
+  - Runtime source fingerprint (same method/file set as Round 4):
+    d15745aa0256899b05246da839ae661fd2490fef42f3c243b48891bf6c15e22b
+    This is a local content identity, not a Git commit or cloud revision.
+
+These are automated technical results, not owner Postman or public HTTPS
+acceptance. No existing core regression failed; online availability/prod access
+and official grader semantics still require the actual deployed environment.
+
+Remaining gates, in execution order:
+  1. Publish the reviewed source to the existing repository/selected branch;
+     current local Git HEAD 5482863 does not contain the developed application.
+  2. Owner creates Render Web Service, supplies private prod URI/privileges and
+     actual outbound CIDRs in Atlas; capture actual HTTPS origin and deployed
+     full commit. No Render token/MCP is needed for the Dashboard route.
+  3. Verify current public readiness/resources, run API-only 75/252 acceptance
+     and cleanup against the actual deployed revision.
+  4. Set only submit.js API_URL to actual origin; preserve grader URL/timeout,
+     warm the service and review actual course self-check feedback. D6 remains
+     provisional until such evidence; a local pass does not promise a score.
+  5. Owner runs a fresh full manual chain on that revision. Reverify final
+     deployed commit/readiness if later source/log publication triggers a deploy.
+  6. Complete actual readable current MP3 chatlog links and source references;
+     owner completes LLM survey/grading form and saves its real receipt.
+
+No commit/push, Render creation/configuration, production write, grader run or
+course-form submission has been performed in this preparation round. No new
+D1-D7 decision is needed for these acceptance tools; the owner still supplies
+or confirms the actual available Render service name/origin in their account.
+
+Round 4 historical runtime source fingerprint (excludes private files/tests/docs):
+  Count: 20 files (app/server, package/lock, Node pins, config/lib/models/routes).
+  SHA256: 67ee513db2f8e69e0269ad15d36e15cf5c3ce0822e177691844e7cbedb39730c
+  Method: SHA256 of compact JSON sorted [relative path, file SHA256] pairs.
+  This identifies local runtime contents; it is not a Git commit or cloud release.
+
+Owner manual steps are in the same docs/manual-acceptance.md and 75-request
+collection (initial reads, R01-R23, U01-U33, Q01-Q06). Failure/race/disconnection
+hooks are automated-only; the owner must not stop Atlas or use public fault
+switches to imitate them. Current online/owner/form acceptance stays pending.
+
+TECHNICAL REFERENCES CONSULTED FOR THIS PLAN
+--------------------------------------------
+Accessed 2026-11-02. These supplement local evidence; current web docs may show
+a later patch than lockfile Mongoose 9.11.1. Verify chosen API behavior against
+the installed locked version in Step 11 instead of upgrading to match a page.
+  - Mongoose transactions (session propagation, sequential work, retries):
+    https://mongoosejs.com/docs/transactions.html
+  - Mongoose validation (unique index vs validator; update-validator limits):
+    https://mongoosejs.com/docs/validation.html
+  - Mongoose findOneAndUpdate return behavior:
+    https://mongoosejs.com/docs/tutorials/findoneandupdate.html
+  - MongoDB multi-document transactions and deployment prerequisites:
+    https://www.mongodb.com/docs/manual/core/transactions/
+    https://www.mongodb.com/docs/manual/core/transactions-production-consideration/
+  - Render Node selection precedence and Web Service port binding:
+    https://render.com/docs/node-version
+    https://render.com/docs/web-services
+  - RFC 9110 section 15.3.5, 204 has no response content:
+    https://www.rfc-editor.org/rfc/rfc9110.html#section-15.3.5
+Record these actual references in SOURCES.md when implementation is authorized.
+
+DONE CRITERIA - DO NOT CHECK UNTIL ACTUALLY PROVED
+-------------------------------------------------
+[x] Owner approved D1-D7 and explicitly authorized Round 1 on 2026-11-02.
+[x] Node 24 / npm ci / Atlas / unique index / commit+abort probes pass.
+[x] Approved contract/OpenAPI/examples and runnable test harness exist.
+[x] Complete User and Task schemas/defaults/server-owned dates are correct.
+[x] All ten HTTP operations and full PUT replacement behavior pass.
+[x] All collection query combinations and member select pass via Mongoose.
+[x] Type/required/reference/duplicate/status/precedence errors pass safely.
+[x] Every assign/transfer/complete/reopen/rename/delete preserves REF invariants.
+[x] Failed writes, injected faults and concurrency tests show no partial state.
+[x] Release candidate passes reproducible install and actual test/check scripts.
+[x] API-only acceptance commands, workflow/recovery regressions and detailed
+    owner/Render instructions pass their local technical checks.
+[ ] Current public Render release uses Atlas and passes online HTTP verification.
+[ ] Real grader feedback is reviewed; no required failures remain undisclosed.
+[ ] Owner completes manual final acceptance on the deployed API.
+[ ] Actual references and current readable chatlogs accompany source; no secrets.
+[ ] Owner completes LLM survey, grading form and saves submission confirmation.

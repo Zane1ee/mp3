@@ -1,0 +1,3058 @@
+{
+  "info": {
+    "name": "CS409 MP3 - staged API acceptance",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run all 75 staged requests in order with fresh fixtures from acceptance:prepare (local or Render) OR the local _dev fixture CLI. Follow docs/manual-acceptance.md and preserve runTag/IDs for cleanup. API preparation/cleanup needs no database credentials. Never mix the two fixture methods. Automated HTTP/VM replay does not replace owner manual acceptance. Finish with Q01-Q06 query-boundary regressions."
+  },
+  "variable": [
+    {
+      "key": "apiBase",
+      "value": "http://localhost:3000/api"
+    },
+    {
+      "key": "runTag",
+      "value": ""
+    },
+    {
+      "key": "userA",
+      "value": ""
+    },
+    {
+      "key": "userB",
+      "value": ""
+    },
+    {
+      "key": "task1",
+      "value": ""
+    },
+    {
+      "key": "task2",
+      "value": ""
+    },
+    {
+      "key": "task3",
+      "value": ""
+    },
+    {
+      "key": "createdTask",
+      "value": ""
+    },
+    {
+      "key": "createdDate",
+      "value": ""
+    },
+    {
+      "key": "missingUser",
+      "value": ""
+    },
+    {
+      "key": "lastTaskSnapshot",
+      "value": ""
+    },
+    {
+      "key": "createdUserC",
+      "value": ""
+    },
+    {
+      "key": "createdUserCDate",
+      "value": ""
+    },
+    {
+      "key": "createdUserD",
+      "value": ""
+    },
+    {
+      "key": "createdUserDDate",
+      "value": ""
+    },
+    {
+      "key": "lastUserDSnapshot",
+      "value": ""
+    },
+    {
+      "key": "missingTask",
+      "value": ""
+    },
+    {
+      "key": "completedTaskDate",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "M01 service information",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            ""
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Service identity\", () => pm.expect(body.data.service).to.eql(\"cs409-mp3-api\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M01 database readiness",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/health",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "health"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"DB ready\", () => pm.expect(body.data.ready).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M02 fixture users",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/users?where={\"_id\":{\"$in\":[\"{{userA}}\",\"{{userB}}\"]}}&sort={\"name\":1}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "{\"_id\":{\"$in\":[\"{{userA}}\",\"{{userB}}\"]}}"
+            },
+            {
+              "key": "sort",
+              "value": "{\"name\":1}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Two fixture users\", () => pm.expect(body.data).to.have.length(2));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M03 fixture tasks",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks?where={\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]}}&sort={\"name\":1}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "{\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]}}"
+            },
+            {
+              "key": "sort",
+              "value": "{\"name\":1}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Three fixture tasks\", () => pm.expect(body.data).to.have.length(3));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 full query combination",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks?where={\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]}}&sort={\"name\":1}&select={\"name\":1,\"_id\":0}&skip=1&limit=1&count=false",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "{\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]}}"
+            },
+            {
+              "key": "sort",
+              "value": "{\"name\":1}"
+            },
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"_id\":0}"
+            },
+            {
+              "key": "skip",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "count",
+              "value": "false"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Only second name\", () => pm.expect(body.data).to.eql([{name:\"QA-\"+pm.collectionVariables.get(\"runTag\")+\"-02\"}]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 count before paging",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks?where={\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]}}&sort={\"name\":1}&select={\"name\":1,\"_id\":0}&skip=1&limit=1&count=true",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "{\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]}}"
+            },
+            {
+              "key": "sort",
+              "value": "{\"name\":1}"
+            },
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"_id\":0}"
+            },
+            {
+              "key": "skip",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "1"
+            },
+            {
+              "key": "count",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Count is three\", () => pm.expect(body.data).to.eql(3));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 completed task filter",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks?where={\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]},\"completed\":true}&count=true",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "{\"_id\":{\"$in\":[\"{{task1}}\",\"{{task2}}\",\"{{task3}}\"]},\"completed\":true}"
+            },
+            {
+              "key": "count",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"One completed task\", () => pm.expect(body.data).to.eql(1));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 member select ignores malformed where",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task1}}?select={\"name\":1,\"_id\":0}&where=NOT_JSON",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task1}}"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"_id\":0}"
+            },
+            {
+              "key": "where",
+              "value": "NOT_JSON"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Only task name\", () => pm.expect(body.data).to.eql({name:\"QA-\"+pm.collectionVariables.get(\"runTag\")+\"-01\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 user member projection",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}?select={\"name\":1,\"_id\":0}&count=NOT_JSON",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"_id\":0}"
+            },
+            {
+              "key": "count",
+              "value": "NOT_JSON"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Only user name\", () => pm.expect(body.data).to.eql({name:\"QA-\"+pm.collectionVariables.get(\"runTag\")+\"-A\"}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 empty list success",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks?where={\"_id\":{\"$in\":[]}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "{\"_id\":{\"$in\":[]}}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Empty successful list\", () => pm.expect(body.data).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 invalid member takes precedence",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/users/not-an-id?select=NOT_JSON",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "not-an-id"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "NOT_JSON"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "M04 invalid collection JSON",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{apiBase}}/tasks?where=NOT_JSON",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "where",
+              "value": "NOT_JSON"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OPTIONS no-content CORS",
+      "request": {
+        "method": "OPTIONS",
+        "url": {
+          "raw": "{{apiBase}}/tasks",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"No response body\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R01 create unassigned Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"_id\": \"000000000000000000000001\",\n  \"dateCreated\": \"2000-01-01\",\n  \"__v\": 999\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get(\"createdTask\")) throw new Error(\"Clean the previous createdTask and clear its variable before creating another task.\");",
+              "pm.collectionVariables.set(\"missingUser\", Array.from({length:24}, () => Math.floor(Math.random()*16).toString(16)).join(\"\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set(\"createdTask\", body.data._id); pm.collectionVariables.set(\"createdDate\", body.data.dateCreated); }",
+              "pm.test(\"Default incomplete\", () => pm.expect(body.data.completed).to.eql(false));",
+              "pm.test(\"Default description\", () => pm.expect(body.data.description).to.eql(\"\"));",
+              "pm.test(\"Default unassigned\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));",
+              "pm.test(\"Default owner name\", () => pm.expect(body.data.assignedUserName).to.eql(\"unassigned\"));",
+              "pm.test(\"Client version ignored\", () => pm.expect(body.data.__v).to.eql(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R02 assign Task to A",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"assignedUser\": \"{{userA}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Derive A name\", () => pm.expect(body.data.assignedUserName).to.eql(\"QA-\"+pm.collectionVariables.get(\"runTag\")+\"-A\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R03 inspect A pending list",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"A has two pending tasks\", () => pm.expect(body.data.pendingTasks.slice().sort()).to.eql([pm.collectionVariables.get(\"task2\"),pm.collectionVariables.get(\"createdTask\")].sort()));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R04 complete Task assigned to A",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"completed\": true,\n  \"assignedUser\": \"{{userA}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Completed Task stays assigned\", () => pm.expect(body.data.assignedUser).to.eql(pm.collectionVariables.get(\"userA\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R05 inspect A after completion",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Completed Task removed from pending\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task2\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R06 transfer completed Task to B",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"completed\": true,\n  \"assignedUser\": \"{{userB}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Completed transfer valid\", () => pm.expect(body.data.assignedUser).to.eql(pm.collectionVariables.get(\"userB\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R07 inspect B completed-only ownership",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userB}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userB}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"B has no pending Task\", () => pm.expect(body.data.pendingTasks).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R08 reopen Task for B",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"completed\": false,\n  \"description\": \"nonempty before replacement\",\n  \"assignedUser\": \"{{userB}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R09 inspect B after reopening",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userB}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userB}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Reopened Task pending for B\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"createdTask\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R10 transfer pending Task back to A",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"assignedUser\": \"{{userA}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R11 inspect B after transfer",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userB}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userB}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Old membership removed\", () => pm.expect(body.data.pendingTasks).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R12 inspect A after transfer",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"New membership added once\", () => pm.expect(body.data.pendingTasks.slice().sort()).to.eql([pm.collectionVariables.get(\"task2\"),pm.collectionVariables.get(\"createdTask\")].sort()));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R13 populate optional fields before reset",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"completed\": true,\n  \"description\": \"reset me\",\n  \"assignedUser\": \"{{userA}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R14 replace with required fields only",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Reset description\", () => pm.expect(body.data.description).to.eql(\"\"));",
+              "pm.test(\"Reset completed\", () => pm.expect(body.data.completed).to.eql(false));",
+              "pm.test(\"Reset assignedUser\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));",
+              "pm.test(\"Reset assignedUserName\", () => pm.expect(body.data.assignedUserName).to.eql(\"unassigned\"));",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"lastTaskSnapshot\", JSON.stringify(body.data));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R15 inspect A after omission reset",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Omitted assignment clears membership\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task2\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R16 reject missing required fields",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"description\": \"PATCH-like body\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R17 reject invalid URL before body",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/not-an-id",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "not-an-id"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R18 reject nonexistent user before mismatched name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"assignedUser\": \"{{missingUser}}\",\n  \"assignedUserName\": \"wrong\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R19 reject mismatched assigned name",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"assignedUser\": \"{{userA}}\",\n  \"assignedUserName\": \"wrong\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R20 inspect Task after rejected writes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Failed requests leave Task unassigned\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));",
+              "pm.test(\"Failed request did not apply description\", () => pm.expect(body.data.description).to.eql(\"\"));",
+              "pm.test(\"Every Task field unchanged after rejected writes\", () => pm.expect(body.data).to.eql(JSON.parse(pm.collectionVariables.get(\"lastTaskSnapshot\"))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R21 form false is an actual Boolean",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "name",
+              "value": "QA-{{runTag}}-created",
+              "type": "text"
+            },
+            {
+              "key": "deadline",
+              "value": "2026-12-01T12:00:00Z",
+              "type": "text"
+            },
+            {
+              "key": "completed",
+              "value": "false",
+              "type": "text"
+            },
+            {
+              "key": "assignedUser",
+              "value": "{{userA}}",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Form false stays false\", () => pm.expect(body.data.completed).to.eql(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R22 inspect A after form assignment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Form assignment synchronized\", () => pm.expect(body.data.pendingTasks.slice().sort()).to.eql([pm.collectionVariables.get(\"task2\"),pm.collectionVariables.get(\"createdTask\")].sort()));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "R23 restore unassigned state for cleanup",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{createdTask}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{createdTask}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-created\",\n  \"deadline\": \"2026-12-01T12:00:00Z\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Creation date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdDate\")));",
+              "pm.test(\"Ready for owned fixture cleanup\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U01 create User C with defaults",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-C\",\n  \"email\": \"qa.{{runTag}}.c@example.com\",\n  \"_id\": \"000000000000000000000001\",\n  \"dateCreated\": \"2000-01-01\",\n  \"__v\": 999\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get(\"createdUserC\")) throw new Error(\"Clean the previous User C before starting a new User sequence.\");",
+              "pm.collectionVariables.set(\"missingTask\",Array.from({length:24},()=>Math.floor(Math.random()*16).toString(16)).join(\"\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set(\"createdUserC\",body.data._id); pm.collectionVariables.set(\"createdUserCDate\",body.data.dateCreated); }",
+              "pm.test(\"Default empty pending list\", () => pm.expect(body.data.pendingTasks).to.eql([]));",
+              "pm.test(\"Ignore client version\", () => pm.expect(body.data.__v).to.eql(0));",
+              "pm.test(\"Server creation time\", () => pm.expect(Date.parse(body.data.dateCreated) > Date.parse(\"2026-01-01\")).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U02 User C takes two tasks with deduplication",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserC}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserC}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-C\",\n  \"email\": \"qa.{{runTag}}.c@example.com\",\n  \"pendingTasks\": [\n    \"{{task1}}\",\n    \"{{task2}}\",\n    \"{{task1}}\"\n  ],\n  \"dateCreated\": \"2000-01-01\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"User C date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdUserCDate\")));",
+              "pm.test(\"Unique full pending list\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task1\"),pm.collectionVariables.get(\"task2\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U03 inspect former owner A",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"A loses moved task\", () => pm.expect(body.data.pendingTasks).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U04 inspect moved Task 2",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task2}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task2}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Task now belongs to C\", () => pm.expect(body.data.assignedUser).to.eql(pm.collectionVariables.get(\"createdUserC\")));",
+              "pm.test(\"Task name matches C\", () => pm.expect(body.data.assignedUserName).to.eql(\"QA-\"+pm.collectionVariables.get(\"runTag\")+\"-C\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U05 give completed Task 3 to C",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task3}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task3}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-completed-for-C\",\n  \"deadline\": \"2026-12-01T12:00:00Z\",\n  \"completed\": true,\n  \"assignedUser\": \"{{createdUserC}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "if (pm.response.code === 200) pm.collectionVariables.set(\"completedTaskDate\",body.data.dateCreated);",
+              "pm.test(\"Completed remains completed\", () => pm.expect(body.data.completed).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U06 rename C retaining its pending tasks",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserC}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserC}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-C-renamed\",\n  \"email\": \"qa.{{runTag}}.c@example.com\",\n  \"pendingTasks\": [\n    \"{{task1}}\",\n    \"{{task2}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"User C date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdUserCDate\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U07 inspect completed Task after rename",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task3}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task3}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Rename includes completed Task\", () => pm.expect(body.data.assignedUserName).to.eql(\"QA-\"+pm.collectionVariables.get(\"runTag\")+\"-C-renamed\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U08 omit nonempty pending list on full replacement",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserC}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserC}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-C-renamed\",\n  \"email\": \"qa.{{runTag}}.c@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"User C date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdUserCDate\")));",
+              "pm.test(\"Omission clears nonempty pending list\", () => pm.expect(body.data.pendingTasks).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U09 inspect removed Task 1 ownership",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task1}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task1}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Removed pending Task unassigned\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U10 inspect removed Task 2 ownership",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task2}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task2}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Other removed Task unassigned\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U11 inspect retained completed ownership",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task3}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task3}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Completed assignment retained\", () => pm.expect(body.data.assignedUser).to.eql(pm.collectionVariables.get(\"createdUserC\")));",
+              "pm.test(\"Still completed\", () => pm.expect(body.data.completed).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U12 give pending Task 1 to B",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userB}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userB}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-B\",\n  \"email\": \"qa.{{runTag}}.b@example.com\",\n  \"pendingTasks\": [\n    \"{{task1}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"B owns Task 1\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task1\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U13 create User D with an already assigned task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-D\",\n  \"email\": \"qa.{{runTag}}.d@example.com\",\n  \"pendingTasks\": [\n    \"{{task1}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.collectionVariables.get(\"createdUserD\")) throw new Error(\"Clean the previous User D before creating another.\");"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set(\"createdUserD\",body.data._id); pm.collectionVariables.set(\"createdUserDDate\",body.data.dateCreated); pm.collectionVariables.set(\"lastUserDSnapshot\",JSON.stringify(body.data)); }",
+              "pm.test(\"User POST moves assigned Task\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task1\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U14 inspect B after User POST transfer",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userB}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userB}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Prior owner cleaned\", () => pm.expect(body.data.pendingTasks).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U15 reject duplicate User email before assignment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-D\",\n  \"email\": \"qa.{{runTag}}.d@example.com\",\n  \"pendingTasks\": [\n    \"{{task2}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U16 missing reference precedes completed-task error",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-D\",\n  \"email\": \"qa.{{runTag}}.d@example.com\",\n  \"pendingTasks\": [\n    \"{{task3}}\",\n    \"{{missingTask}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U17 reject completed pending task",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"QA-{{runTag}}-D\",\n  \"email\": \"qa.{{runTag}}.d@example.com\",\n  \"pendingTasks\": [\n    \"{{task3}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U18 reject invalid User URL before fields",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/not-an-id",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "not-an-id"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U19 reject incomplete User replacement",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"qa.{{runTag}}.d@example.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U20 inspect complete User snapshot after failures",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"User D date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdUserDDate\")));",
+              "pm.test(\"No field/version changed on failure\", () => pm.expect(body.data).to.eql(JSON.parse(pm.collectionVariables.get(\"lastUserDSnapshot\"))));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U21 form pendingTasks JSON array",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "name",
+              "value": "QA-{{runTag}}-D",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "value": "qa.{{runTag}}.d@example.com",
+              "type": "text"
+            },
+            {
+              "key": "pendingTasks",
+              "value": "[\"{{task1}}\",\"{{task2}}\"]",
+              "type": "text"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"User D date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdUserDDate\")));",
+              "pm.test(\"Form pending list decoded\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task1\"),pm.collectionVariables.get(\"task2\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U22 inspect Task 2 after User form replacement",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task2}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task2}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Form assignment synchronized\", () => pm.expect(body.data.assignedUser).to.eql(pm.collectionVariables.get(\"createdUserD\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U23 delete pending Task 2",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task2}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task2}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"D6 deletion payload\", () => pm.expect(body.data).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U24 inspect D after Task deletion",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"User D date unchanged\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"createdUserDDate\")));",
+              "pm.test(\"Deleted Task removed from pending\", () => pm.expect(body.data.pendingTasks).to.eql([pm.collectionVariables.get(\"task1\")]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U25 deleted Task GET is 404",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task2}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task2}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U26 repeated Task DELETE is 404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task2}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task2}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U27 delete C with completed Task ownership",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserC}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserC}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"D6 deletion payload\", () => pm.expect(body.data).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U28 completed Task survives User deletion",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task3}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task3}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Surviving Task unassigned\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));",
+              "pm.test(\"Unassigned name\", () => pm.expect(body.data.assignedUserName).to.eql(\"unassigned\"));",
+              "pm.test(\"Completion preserved\", () => pm.expect(body.data.completed).to.eql(true));",
+              "pm.test(\"Task creation date preserved\", () => pm.expect(body.data.dateCreated).to.eql(pm.collectionVariables.get(\"completedTaskDate\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U29 deleted User C GET is 404",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserC}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserC}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U30 repeated User C DELETE is 404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserC}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserC}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U31 delete D with pending Task ownership",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"D6 deletion payload\", () => pm.expect(body.data).to.eql([]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U32 pending Task survives User deletion",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks/{{task1}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks",
+            "{{task1}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Pending Task unassigned\", () => pm.expect(body.data.assignedUser).to.eql(\"\"));",
+              "pm.test(\"Pending state preserved\", () => pm.expect(body.data.completed).to.eql(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "U33 deleted User D GET is 404",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{createdUserD}}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{createdUserD}}"
+          ],
+          "query": []
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const body = pm.response.json();",
+              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
+              "pm.test(\"Safe error data\", () => pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Q01 reject empty select path",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users?select={\"\":1}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"\":1}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\",()=>pm.response.to.have.status(400));",
+              "const body=pm.response.json();",
+              "pm.test(\"Common response envelope\",()=>{pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]);pm.expect(body.message).to.be.a(\"string\");});",
+              "pm.test(\"Safe error data\",()=>pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Q02 reject projection collision even for count",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks?select={\"name\":1,\"name.child\":1}&count=true",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"name.child\":1}"
+            },
+            {
+              "key": "count",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\",()=>pm.response.to.have.status(400));",
+              "const body=pm.response.json();",
+              "pm.test(\"Common response envelope\",()=>{pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]);pm.expect(body.message).to.be.a(\"string\");});",
+              "pm.test(\"Safe error data\",()=>pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Q03 reject empty sort path even for count",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users?sort={\"\":1}&count=true",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users"
+          ],
+          "query": [
+            {
+              "key": "sort",
+              "value": "{\"\":1}"
+            },
+            {
+              "key": "count",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\",()=>pm.response.to.have.status(400));",
+              "const body=pm.response.json();",
+              "pm.test(\"Common response envelope\",()=>{pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]);pm.expect(body.message).to.be.a(\"string\");});",
+              "pm.test(\"Safe error data\",()=>pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Q04 missing member precedes invalid projection",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/not-an-id?select={\"name\":1,\"name.child\":1}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "not-an-id"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"name.child\":1}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\",()=>pm.response.to.have.status(404));",
+              "const body=pm.response.json();",
+              "pm.test(\"Common response envelope\",()=>{pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]);pm.expect(body.message).to.be.a(\"string\");});",
+              "pm.test(\"Safe error data\",()=>pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Q05 existing member rejects invalid projection",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/users/{{userA}}?select={\"name\":1,\"name.child\":1}",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "users",
+            "{{userA}}"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"name\":1,\"name.child\":1}"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\",()=>pm.response.to.have.status(400));",
+              "const body=pm.response.json();",
+              "pm.test(\"Common response envelope\",()=>{pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]);pm.expect(body.message).to.be.a(\"string\");});",
+              "pm.test(\"Safe error data\",()=>pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Q06 reserved projection path is a bad request",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{apiBase}}/tasks?select={\"$bad\":1}&count=true",
+          "host": [
+            "{{apiBase}}"
+          ],
+          "path": [
+            "tasks"
+          ],
+          "query": [
+            {
+              "key": "select",
+              "value": "{\"$bad\":1}"
+            },
+            {
+              "key": "count",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\",()=>pm.response.to.have.status(400));",
+              "const body=pm.response.json();",
+              "pm.test(\"Common response envelope\",()=>{pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]);pm.expect(body.message).to.be.a(\"string\");});",
+              "pm.test(\"Safe error data\",()=>pm.expect(body.data).to.eql({}));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
