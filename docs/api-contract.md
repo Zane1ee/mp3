@@ -3,7 +3,8 @@
 Status: D1-D7 approved by the owner on 2026-11-02. This is the target contract;
 the implementation through Round 3 covers all ten User/Task resource HTTP
 operations. Runtime checks, owner manual acceptance and later release gates
-remain distinct. Approval does not establish unreleased grader behavior.
+remain distinct. D6 is now resolved by actual grader feedback: successful DELETE returns 204
+with no response body. The original 200/JSON fallback is superseded.
 
 Round 4 release-candidate checks passed on 2026-11-03: clean install, 79 local
 and 86 reported Atlas checks, plus the actual 75-request replay. SOP.txt stores
@@ -12,6 +13,10 @@ manual acceptance, an actual Render release, grader feedback and submission.
 Round 5 reran the full actual-directory gate: 81 local tests and 90 reported
 Atlas entries passed, plus the delivered CLI 75/252 HTTP replay and safe cleanup.
 Counts/grouping and unchanged-data checks are recorded in SOP.txt.
+The DELETE 204 correction passed on 2026-11-04: 90 local tests, 93 reported
+Atlas entries and actual server.js 75/249 replay/cleanup. New raw-byte DELETE
+cases, deferred failures and strict parser regressions passed. This is local
+verification; the corrected online release and official score remain pending.
 
 The actual starter code and lockfile govern integration; README.md and FAQ.md
 define required target behavior. Contract changes require updating examples,
@@ -25,6 +30,7 @@ tests and implementation together. IDs below correspond to SOP.txt.
 - GET `/api` provides service information; GET `/api/health` returns 200 when
   the database is connected, otherwise 503. Neither exposes tokens or URIs.
 - JSON resource responses have exactly `message` (a readable string) and `data`.
+  Successful DELETE is the explicit 204/no-body exception; do not parse it as JSON.
   Errors use `data: {}` and do not include database/stack/credential details.
 - OPTIONS returns 204, without a body, with the declared CORS headers.
 - Unknown API paths return 404 in the same envelope.
@@ -73,23 +79,23 @@ Boolean literals and array shapes. Do not treat the string `false` as true.
 | HTTP-02 | POST `/users` | Created User | 201 |
 | HTTP-03 | GET `/users/{id}` | User, subject to select | 200 |
 | HTTP-04 | PUT `/users/{id}` | Replaced User | 200 |
-| HTTP-05 | DELETE `/users/{id}` | `[]` | 200 |
+| HTTP-05 | DELETE `/users/{id}` | No response body | 204 |
 | HTTP-06 | GET `/tasks` | Task array, or number for count | 200 |
 | HTTP-07 | POST `/tasks` | Created Task | 201 |
 | HTTP-08 | GET `/tasks/{id}` | Task, subject to select | 200 |
 | HTTP-09 | PUT `/tasks/{id}` | Replaced Task | 200 |
-| HTTP-10 | DELETE `/tasks/{id}` | `[]` | 200 |
+| HTTP-10 | DELETE `/tasks/{id}` | No response body | 204 |
 
 PUT replaces all business fields, applies missing optional defaults, requires
 name/email or name/deadline again, retains identity/creation time, and never
 upserts. It is not PATCH. DELETE removes only the selected resource and cleans
 references; deleting a user retains their tasks as unassigned.
 
-D6: the owner approved provisional DELETE 200 with `{message,data:[]}` because
-the materials do not assign one explicit DELETE success status while also
-mentioning 204 and requiring JSON envelopes. This does not guarantee grader
-acceptance; adjust contract/tests together if course clarification requires 204.
-A 204 response must have no body.
+D6 resolved on 2026-11-04: the owner's actual course grader report required
+204 and an empty response body for both successful DELETE endpoints. The earlier
+200/JSON policy was a provisional choice and is superseded. A successful DELETE
+has zero content bytes and no message/data envelope. Missing/malformed targets
+and unexpected failures retain the existing 404/500 JSON error envelopes.
 
 ## VALID: error ordering
 
@@ -205,9 +211,9 @@ owned tasks, including completed ones, and retains the task documents.
 Constructor-only before/after-write hooks support real rollback/race tests;
 there is no request parameter, environment switch or public fault endpoint.
 
-Successful DELETE follows approved D6: HTTP 200 with User/Task deleted message
-and data: []. A repeat/malformed/missing target returns 404 with data: {}.
-This remains provisional grading policy until actual course/grader evidence.
+Successful DELETE awaits transaction completion, then returns HTTP 204 with
+zero response content. A repeat/malformed/missing target returns 404 with data:
+{}. A failed transaction remains a safe JSON 500 and never becomes a false 204.
 
 Transaction behavior was checked against locked Mongoose 9.11.1/driver 7.7.0
 source and real Atlas, with the [Mongoose transaction guide](https://mongoosejs.com/docs/transactions.html)
@@ -223,7 +229,7 @@ explicit local/unit transport doubles. No test drops a database/collection.
 | Requirement / risk | Concrete automated evidence | Manual / remaining gate |
 |---|---|---|
 | Fields/defaults, full replacement, dates | unit/validation; integration/task-writes and user-deletes | R01-R23, U01-U22 |
-| Ten HTTP methods, envelopes, 200/201/400/404/500; OPTIONS 204 empty | unit/http, task-writes, user-deletes; actual collection replay | Initial reads/CORS and R/U sequences; D6 remains provisional |
+| Ten HTTP methods, envelopes, 200/201/400/404/500; OPTIONS 204 empty | unit/http, task-writes, user-deletes; actual collection replay | Initial reads/CORS and R/U sequences; successful DELETE is 204/empty |
 | All query parameters, operators, limits and selection | reads plus query-boundaries: 64 subsets per resource, 101-item defaults, member precedence | Initial read checks; Q01-Q06 |
 | Exact validation order, own/duplicate email, rejected snapshots | task-writes and user-deletes | R16-R20; U15-U20 |
 | Both reference directions and completed ownership | all mutation suites with the independent world invariant checker | R02-R23; U02-U33 |
@@ -241,3 +247,14 @@ requests over real HTTP/Atlas, lost/unsaved-ID recovery, a foreign sentinel and
 foreign-link cleanup refusal. Owner checks and exact Render settings are in
 `manual-acceptance.md` section 0 and `setup.md`; no public origin or online pass
 is inferred from these local results.
+
+DELETE correction regression coverage (2026-11-04):
+- Unit HTTP cases for both endpoints assert 204 and actual zero-byte responses;
+  deferred failures, missing targets and unexpected failures preserve JSON errors.
+- scripts/api-response.js distinguishes empty DELETE success from strict JSON
+  responses; negative tests reject the old 200/JSON contract and malformed bodies.
+- integration/delete-contract independently reads raw HTTP bytes, then fresh GETs
+  verify deleted resources, pending cleanup, surviving completed tasks and
+  unchanged unrelated records. Existing rollback/concurrency cases remain active.
+- Postman and API cleanup clients use the resolved contract; current collection
+  expectations are 75 requests / 249 assertions. Actual run evidence is in SOP.txt.

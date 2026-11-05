@@ -3,7 +3,7 @@ MP3 STANDARD OPERATING PROCEDURE (SOP)
 Project: CS409 MP3 - APIed Piper / Task Management API
 Target repository: /Users/a16594/Desktop/uiuc FA26/cs 409/mp3
 Planning date: 2026-11-02 (America/Chicago)
-Version: 1.5 - Round 5 API acceptance/deployment preparation; Render creation pending
+Version: 1.6 - DELETE 204 correction verified locally; corrected online score pending
 Deadline: 2026-11-03, 11:59 PM CT, as stated in README.md
 
 CURRENT STATUS AND THIS ROUND'S BOUNDARY
@@ -31,6 +31,18 @@ responses/validation, reference consistency, regression coverage and manual
 acceptance. On 2026-11-03 the owner confirmed no Render Web Service exists yet.
 API-only acceptance/deployment preparation proceeds locally; cloud/owner/grader/
 submission gates are not waived. Dated evidence appears below.
+
+Latest status (2026-11-04, supersedes earlier pending deployment statements):
+  - Owner confirms the earlier local/online acceptance and deployment are complete.
+    Reported public origin: https://cs409-mp3-api-wyqe.onrender.com.
+  - Owner supplied actual grader output: 18/20 points, 90/100; only Task/User
+    successful DELETE status/body checks failed (200 JSON vs required 204 empty).
+    Deleted-resource GET checks passed. D6's provisional choice is superseded.
+  - Owner reviewed fault localization and authorized this targeted correction,
+    aligned tools/contracts and new regression cases. No transaction rewrite,
+    database migration or private environment change is needed.
+  - Original-round evidence below is historical. This patch needs its own local
+    verification and, after publication, a newly deployed online/grader result.
 
 Labels used throughout:
   REQUIRED: explicit MP3 assignment requirement.
@@ -261,18 +273,17 @@ Actions:
     JSON types; URL-encoded transport explicitly decodes completed=true/false
     and pendingTasks as a JSON-array string or a parsed array, then uses the
     same strict validator. "false" must never become truthy via Boolean(value).
-  - D6 is unresolved: README lists 204 and also requires two-field JSON but
-    does not assign DELETE one explicit success status. No starter DELETE or
-    local grader code resolves it. Proposed fallback is DELETE 200 with
-    {"message":"Task deleted","data":[]} (analogous User message). A course
-    clarification may instead require 204 with NO body. Never send JSON under
-    204. OPTIONS may legitimately return 204, but does not prove grader intent.
+  - D6 resolved by actual grader feedback on 2026-11-04: successful Task/User
+    DELETE awaits the committed mutation, then returns 204 with zero body bytes.
+    There is no JSON envelope for this success response. Missing/malformed
+    targets and unexpected failures retain JSON 404/500. The earlier 200/JSON
+    fallback remains only in historical records, not the current contract.
 Test / review:
   - Contract cases include every status, error precedence, parser failures,
     both body encodings and response shape. Verify actual updated, not old, data.
 Acceptance:
-  - No endpoint invents its own status/error convention. D6 is visibly pending;
-    the owner may approve the fallback while acknowledging unverified grading.
+  - Current contracts, runtime, client parsers and independent HTTP-byte tests
+    agree on the grader-confirmed DELETE 204/empty policy; errors remain JSON.
 
 ------------------------------------------------------------
 STEP 6: SPECIFY QUERY PARSING AND DATABASE EXECUTION
@@ -758,12 +769,12 @@ D5. Underspecified query/precedence behavior
   precedes invalid select. Freeze this policy in contract/tests; ask course staff
   about count/limit semantics if their expected behavior remains uncertain.
 
-D6. Successful DELETE response (grading ambiguity)
-  Recommend seek course clarification if available; otherwise approve the
-  provisional DELETE 200 + {message,data:[]} policy in Step 5. Alternative is
-  204 with an empty body if course guidance requires it. Existing files cannot
-  establish which status the unreleased grader expects. Approval is a design
-  decision under that uncertainty, not evidence of official acceptance.
+D6. Successful DELETE response (resolved 2026-11-04)
+  Actual grader feedback requires HTTP 204 and zero body bytes for successful
+  Task/User DELETE. The owner approved the correction after fault localization.
+  This supersedes the original provisional 200/JSON choice approved 2026-11-02.
+  Keep 404/500 errors as JSON, await transaction completion before 204, and
+  update contract/tests/tools together. Original round records remain historical.
 
 D7. Naming, language and documentation presentation
   Recommend service label cs409-mp3-api; databases cs409_mp3_dev/test/prod;
@@ -910,8 +921,8 @@ Reusable bodies (replace the variables with real values):
      "pendingTasks":["{{T1}}"]}
   A missing optional assignedUserName is deliberately derived from the real user.
   All main-chain expectations below assume approved defaults D4/D5 and the
-  provisional DELETE 200 policy D6. Update them if the owner/course chooses
-  another contract before development; no test should accept both silently.
+  resolved DELETE 204/no-content policy D6. Success has no JSON envelope;
+  no test should silently accept both the old 200 and the required 204.
 
 M01. Start and prove availability.
   Later, in a terminal:
@@ -1046,7 +1057,7 @@ M16. Error matrix: snapshot A/B/C and T1-T5 before each negative request;
   Use disposable records and preserve the main chain's state for deletion below.
 
 M17. Delete a pending task and a user with both task states.
-  DELETE /tasks/{{T4}} -> chosen D6 success (default 200 envelope); GET T4 ->404;
+  DELETE /tasks/{{T4}} -> D6 success: 204 with zero body bytes; GET T4 ->404;
   A.pendingTasks=[]; completed T5 still assigned to A. DELETE T4 again ->404.
   Assign T3 to B as incomplete using full Task PUT; B.pendingTasks=[T3].
   DELETE /users/{{B}} -> chosen success; GET B ->404. T2 (completed) AND T3
@@ -1621,6 +1632,73 @@ course-form submission has been performed in this preparation round. No new
 D1-D7 decision is needed for these acceptance tools; the owner still supplies
 or confirms the actual available Render service name/origin in their account.
 
+DELETE 204 CORRECTION / REGRESSION UPDATE (2026-11-04)
+----------------------------------------------------
+Evidence and root cause:
+  - Owner-provided grader log for https://cs409-mp3-api-wyqe.onrender.com reports
+    90/100 (18/20). Both DELETE checks require 204/empty; both post-delete GET
+    checks pass. The shared deletion router awaited mutations but returned 200
+    through the JSON responder. D6's test oracle was wrong for this assignment.
+  - RED reproduced before the fix: two independent loopback HTTP tests, one per
+    resource, both fail with actual 200 vs expected 204. No Atlas write needed.
+  - GREEN focused transport/parser tests after the fix: all 12 reported tests
+    passed, including zero bytes, service invoked once, deferred failure 500,
+    both endpoints' 404/500 JSON, and strict client parser negative cases.
+
+Changes:
+  - routes/deletions.js awaits the same mutation, then status(204).end().
+    Existing transaction/session/version logic, schemas and error handler stay
+    unchanged. Service-internal return [] is not sent as an HTTP response.
+  - scripts/api-response.js handles only successful DELETE as 204/empty; all
+    other resource responses require the existing JSON envelope. Old 200 JSON,
+    nonempty 204, malformed error JSON and unrelated empty successes are rejected.
+  - API cleanup and all affected HTTP test clients use that parser. Concurrency
+    and fault-boundary tests now expect 204 on successful DELETE only; errors
+    still prove rollback with safe JSON and unchanged complete snapshots.
+  - Three successful Postman DELETE requests assert 204 plus raw empty text;
+    current total is 75 requests / 249 assertions (previous 252 was historical).
+    OpenAPI 204 responses have no content schema; obsolete DeleteResponse is
+    removed. Static contract checks prohibit the superseded 200 success entry.
+  - New integration/delete-contract uses independent raw response bytes and
+    immediate GETs for both resources, pending cleanup, surviving completed tasks,
+    preserved dates, unchanged unrelated documents and repeat/malformed 404.
+  - Maintained contract/manual/setup guidance is current. The setup guide also
+    corrects the earlier network advice to include README.md:89's explicit
+    Allow access from anywhere requirement; no cloud configuration is changed.
+
+Final actual-directory verification (all exit 0):
+  - npm run check: 41 JavaScript syntax checks; ten resource operations, valid
+    OpenAPI refs, explicit DELETE 204/no-content/error schemas and 78 script
+    syntax checks for 75 Postman requests. All 90 local tests passed, zero failed,
+    cancelled or skipped. The DELETE-specific focused test run also passed 12/12.
+  - npm run test:integration: all 93 reported entries passed, zero failed,
+    cancelled or skipped, about 157 seconds. Eight grouping parents, 84 subtests
+    and one standalone availability case = 85 substantive scenarios. Existing
+    128 query subsets, 19 rollback positions, session and race checks still pass.
+  - Actual server.js process plus delivered CLI: all 75 requests / 249 assertions
+    pass with owned cleanup. Fresh prepare + manual-style unsaved creation +
+    cleanup also pass; all pre-existing development documents/fields/versions
+    equal their original snapshot. No fixture manifests, CLI locks or server left.
+  - Owner .env.example/submit.js edits, private .env content (0600/ignored),
+    README/FAQ/LICENSE, package/lockfile, server/configuration and the transaction
+    service are unchanged from this turn's baseline. Only routes/deletions.js
+    differs among the previous 20 runtime fingerprint entries. No dependency
+    change or schema/data migration. git diff --check passes.
+  - Local runtime fingerprint (same 20-file method as earlier rounds):
+    b36d2c58e5ec2a5569793c92da27d804821003b5e1b61b560efb320e87bd8345
+    Client/test/helper edits are separately covered by check and the verified
+    intended-file set; this fingerprint is not a Git commit or deployed revision.
+
+Local correction and regression acceptance are complete. No push/deployment or
+new official grader run was performed in this turn. Next: publish this patch,
+verify Render's new commit/readiness, rerun 75/249 online acceptance and then
+npm run submit. Only a new actual report establishes the corrected official score.
+
+The owner's .env.example and submit.js edits are preserved; no credential is
+printed. No runtime dependency or transaction algorithm change. Publication,
+Render redeployment and corrected official score require separate real evidence;
+the original 90/100 is not relabeled as a corrected result.
+
 Round 4 historical runtime source fingerprint (excludes private files/tests/docs):
   Count: 20 files (app/server, package/lock, Node pins, config/lib/models/routes).
   SHA256: 67ee513db2f8e69e0269ad15d36e15cf5c3ce0822e177691844e7cbedb39730c
@@ -1667,8 +1745,9 @@ DONE CRITERIA - DO NOT CHECK UNTIL ACTUALLY PROVED
 [x] Release candidate passes reproducible install and actual test/check scripts.
 [x] API-only acceptance commands, workflow/recovery regressions and detailed
     owner/Render instructions pass their local technical checks.
-[ ] Current public Render release uses Atlas and passes online HTTP verification.
+[ ] Corrected DELETE release is published/deployed and passes online HTTP checks.
 [ ] Real grader feedback is reviewed; no required failures remain undisclosed.
-[ ] Owner completes manual final acceptance on the deployed API.
+[x] Owner confirms earlier local/online manual acceptance.
+[ ] Owner verifies the corrected DELETE response on the newly deployed revision.
 [ ] Actual references and current readable chatlogs accompany source; no secrets.
 [ ] Owner completes LLM survey, grading form and saves submission confirmation.

@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const { isolatedTestTarget } = require('../../config/environment');
 const { connectDatabase } = require('../../config/database');
 const { createRelationshipService } = require('../../lib/relationships');
+const { parseApiResponse } = require('../../scripts/api-response');
 const createApp = require('../../app');
 const User = require('../../models/user');
 const Task = require('../../models/task');
@@ -30,7 +31,7 @@ test('Atlas Round 4 RACE: controlled stale snapshots and newly assigned tasks', 
     const outcome = fetch(`http://127.0.0.1:${server.address().port}/api/${first.resource}`, {
       method: first.method, headers: { 'Content-Type': 'application/json' },
       body: first.body === undefined ? undefined : JSON.stringify(first.body), signal: AbortSignal.timeout(20000),
-    }).then(async (response) => ({ status: response.status, ...(await response.json()) }))
+    }).then(async (response) => parseApiResponse(response.status, await response.text(), first.method))
       .then((value) => ({ value }), (error) => ({ error }));
     try {
       await reached.promise;
@@ -93,7 +94,7 @@ test('Atlas Round 4 RACE: controlled stale snapshots and newly assigned tasks', 
           assigned = await w.request('POST', 'tasks', w.body({ assignedUser: w.userB, completed: action !== 'clear pending' }));
           assert.equal(assigned.status, 201);
         }, async (result) => {
-          assert.equal(result.status, 200);
+          assert.equal(result.status, action === 'delete' ? 204 : 200);
           const task = await w.task(assigned.data._id);
           if (action === 'rename') {
             assert.equal(task.assignedUser, w.userB);
@@ -114,7 +115,7 @@ test('Atlas Round 4 RACE: controlled stale snapshots and newly assigned tasks', 
         const b = await w.user(w.userB);
         assert.equal((await w.request('PUT', `users/${w.userB}`, { name: b.name, email: b.email, pendingTasks: [w.task2] })).status, 200);
       }, async (result) => {
-        assert.equal(result.status, 200);
+        assert.equal(result.status, 204);
         assert.equal(await w.task(w.task2), null);
         assert.deepEqual((await w.user(w.userA)).pendingTasks, []);
         assert.deepEqual((await w.user(w.userB)).pendingTasks, []);

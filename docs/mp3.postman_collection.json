@@ -2,7 +2,7 @@
   "info": {
     "name": "CS409 MP3 - staged API acceptance",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Run all 75 staged requests in order with fresh fixtures from acceptance:prepare (local or Render) OR the local _dev fixture CLI. Follow docs/manual-acceptance.md and preserve runTag/IDs for cleanup. API preparation/cleanup needs no database credentials. Never mix the two fixture methods. Automated HTTP/VM replay does not replace owner manual acceptance. Finish with Q01-Q06 query-boundary regressions."
+    "description": "Run all 75 staged requests in order with fresh fixtures from acceptance:prepare (local or Render) OR the local _dev fixture CLI. Follow docs/manual-acceptance.md and preserve runTag/IDs for cleanup. API preparation/cleanup needs no database credentials. Never mix the two fixture methods. Automated HTTP/VM replay does not replace owner manual acceptance. Finish with Q01-Q06 query-boundary regressions. Successful DELETE returns 204 with no body; missing targets retain 404 JSON."
   },
   "variable": [
     {
@@ -2490,10 +2490,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
-              "const body = pm.response.json();",
-              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
-              "pm.test(\"D6 deletion payload\", () => pm.expect(body.data).to.eql([]));"
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"DELETE response has zero content\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
             ]
           }
         }
@@ -2619,10 +2617,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
-              "const body = pm.response.json();",
-              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
-              "pm.test(\"D6 deletion payload\", () => pm.expect(body.data).to.eql([]));"
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"DELETE response has zero content\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
             ]
           }
         }
@@ -2750,10 +2746,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
-              "const body = pm.response.json();",
-              "pm.test(\"Common response envelope\", () => { pm.expect(Object.keys(body).sort()).to.eql([\"data\",\"message\"]); pm.expect(body.message).to.be.a(\"string\"); });",
-              "pm.test(\"D6 deletion payload\", () => pm.expect(body.data).to.eql([]));"
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"DELETE response has zero content\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
             ]
           }
         }

@@ -13,6 +13,7 @@ const createApp = require('../../app');
 const User = require('../../models/user');
 const Task = require('../../models/task');
 const { prepare, replay, cleanup } = require('../../scripts/acceptance');
+const { parseApiResponse } = require('../../scripts/api-response');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env'), quiet: true });
 
 test('Atlas Round 5: API-only acceptance and scoped recovery against real HTTP', { timeout: 90000 }, async (t) => {
@@ -26,7 +27,7 @@ test('Atlas Round 5: API-only acceptance and scoped recovery against real HTTP',
   async function request(method, resource, body) {
     const response = await fetch(`${origin}/api/${resource}`, { method,
       headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
-    return { status: response.status, ...await response.json() };
+    return parseApiResponse(response.status, await response.text(), method);
   }
   try {
     await t.test('all 75 reviewed requests replay over HTTP; five surviving records clean by API', async () => {
@@ -35,7 +36,7 @@ test('Atlas Round 5: API-only acceptance and scoped recovery against real HTTP',
       assert.equal(manifest.phase, 'prepared');
       await assert.rejects(prepare(origin, manifestPath), /already exists/);
       const result = await replay(manifestPath);
-      assert.deepEqual(result, { requests: 75, assertions: 252 });
+      assert.deepEqual(result, { requests: 75, assertions: 249 });
       await assert.rejects(replay(manifestPath), /fresh prepared/);
       assert.deepEqual(await cleanup(manifestPath), { users: 2, tasks: 3 });
       assert.equal(fs.existsSync(manifestPath), false);

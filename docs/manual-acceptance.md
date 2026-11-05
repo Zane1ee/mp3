@@ -2,29 +2,28 @@
 
 Scope through Round 5 preparation: all ten User/Task resource operations, models, shared
 validation/transactions, queries and service/readiness responses. DELETE uses
-the approved provisional D6 response: 200 with JSON {message,data:[]}.
+the grader-confirmed D6 response: HTTP 204 with zero body bytes. Errors
+retain their existing JSON envelope. The old 200/JSON fallback is superseded.
 The fixture CLI remains a local developer tool, not a public seed endpoint.
 
-Round 5 local verification passed on **2026-11-03**: clean lockfile
-installation with zero audit findings, 81 local tests and 90 reported Atlas
-checks, all with zero failed/cancelled/skipped results. The integration report
-contains seven grouping parents, 82 subtests and one standalone availability
-case (83 substantive scenarios). All 75 requests and 252 embedded assertions
-passed actual server.js / CLI HTTP/VM replay; API-only preparation, an unsaved
-manual-style creation and scoped cleanup also passed. Original development data
-and private configuration stayed unchanged. Earlier separate-process persistence
-checks are recorded in SOP.txt. Automated verification does not complete your
-Postman UI/manual acceptance or online/submission gates.
+The owner completed the earlier local/online acceptance and supplied an actual
+course grader report: 90/100; only successful Task/User DELETE status/body checks
+failed (200/JSON instead of 204/empty). The DELETE correction passed actual-directory verification on 2026-11-04:
+90 local tests, 93 reported Atlas entries (85 scenarios plus grouping nodes),
+and the actual server.js CLI replay of 75 requests / 249 assertions, all with
+zero failures/cancellations/skips. Owned cleanup and unchanged-data/private-env
+checks passed. Earlier 75/252 and 81/90 results remain historical in SOP.txt.
+The correction still needs publication/redeployment and a new official score.
 The current combined collection contains 75 requests for the stages below.
 All required endpoint methods now exist; the full SOP Appendix B chain is also
 available for later end-to-end owner acceptance, with its own fresh data.
 
 ## 0. Recommended Round 5 path: one API-only flow locally or on Render
 
-The owner confirmed no Render Web Service exists yet. Follow
-[setup.md's Render steps](setup.md#render-preparation) to deploy; the same flow
-below can be manually accepted locally now, then repeated on the actual online
-revision. Record the origin, full deployed commit, time and runTag separately.
+The owner has deployed https://cs409-mp3-api-wyqe.onrender.com and completed
+the earlier acceptance. After publishing this correction, verify the new deployed
+commit and repeat the flow below against the actual online revision. Local
+acceptance can be performed before that deployment. Record the origin, full deployed commit, time and runTag separately.
 Do not treat local/manual/automated/online results as interchangeable.
 
 1. Start the local service in another terminal with `npm start`, or warm the
@@ -38,7 +37,7 @@ Do not treat local/manual/automated/online results as interchangeable.
    npm run acceptance:run -- --origin "http://localhost:3000"
    ```
 
-   Expected: fresh API-created samples, all 75 requests and 252 assertions pass,
+   Expected: fresh API-created samples, all 75 requests and 249 assertions pass,
    followed by owned cleanup. It needs no DB credential and creates no public
    seed endpoint. It does not restart Render or complete owner manual acceptance.
 3. Prepare a **different fresh run** for your manual operation:
@@ -110,7 +109,7 @@ Three additional manual negative requests, all to PUT
 
 For each, expect exactly `{message,data:{}}` with a readable message, no stack/
 database details, and identical fresh GET snapshots afterward. These three
-owner-operated requests are **additional** to the collection's 75/252 count.
+owner-operated requests are **additional** to the collection's 75/249 count.
 Keep the original request unchanged by using a separate Postman tab.
 
 If a request fails: stop the sequence and save its request name, method/path,
@@ -278,10 +277,10 @@ Do not overwrite or clear those saved IDs until their resources are cleaned.
 | U15 duplicate email; U16 missing+completed refs; U17 only completed ref | 400, 404, 400 respectively, with no mutation |
 | U18 invalid User URL; U19 missing required field; U20 GET D | 404 then 400; every D field/version equals U13's saved snapshot |
 | U21 form pendingTasks JSON array; U22 GET Task2 | 200; D has Task1/Task2 and Task2 points back to D |
-| U23 DELETE pending Task2; U24 GET D; U25/U26 GET/repeat DELETE | 200 with data=[]; D keeps only Task1; both later requests return 404 |
-| U27 DELETE C with completed ownership; U28 GET Task3 | 200 with data=[]; Task3 still exists, completed=true, unassigned, same creation date |
+| U23 DELETE pending Task2; U24 GET D; U25/U26 GET/repeat DELETE | 204 with an empty body; D keeps only Task1; both later requests return 404 |
+| U27 DELETE C with completed ownership; U28 GET Task3 | 204 with an empty body; Task3 still exists, completed=true, unassigned, same creation date |
 | U29/U30 GET/repeat DELETE C | Both 404 with safe data={} |
-| U31 DELETE D with pending ownership; U32 GET Task1; U33 GET D | 200 with data=[]; Task1 survives unassigned and incomplete; D is 404 |
+| U31 DELETE D with pending ownership; U32 GET Task1; U33 GET D | 204 with an empty body; Task1 survives unassigned and incomplete; D is 404 |
 
 For a creation persistence check, pause after U01, GET/save User C's data,
 stop/restart the service, and GET C again before continuing U02. All fields,
@@ -336,7 +335,7 @@ A.pendingTasks=[]; Task3 remains completed/unassigned after C's deletion.
 The new C/D users and fixture Task2 remain 404 after restart.
 
 If you stopped before finishing U01-U33, DELETE any surviving createdUserC and
-createdUserD by their saved IDs first. Their successful DELETE is 200, or 404
+createdUserD by their saved IDs first. Their successful DELETE is 204 with no body, or JSON 404
 if already removed. This unassigns their tasks so developer cleanup can safely
 check relationships. Do not delete an unrelated User just to make cleanup pass.
 If you only ran R01-R23, A.pendingTasks=[task2] is the correct intermediate
@@ -367,13 +366,14 @@ resource/date/snapshot variables. Keep the actual saved IDs until then.
 - Automated verification does not complete your owner-operated manual acceptance.
 - All ten operations and the listed local risk/release gates have automated
   evidence in SOP.txt; actual online release/revision checks remain separate.
-- Render service creation, publishing/deploying the actual developed revision,
-  private production-DB/network configuration and public HTTPS acceptance are
-  pending. The owner confirmed the service does not yet exist.
+- The owner confirmed the original Render deployment and acceptance are complete.
+  This local DELETE correction still needs publication, a verified new deployed
+  revision and a fresh online acceptance run.
 - After online technical checks, complete the same owner-operated chain on
   that deployed revision and record the actual results.
-- Set only submit.js API_URL to the actual origin, warm readiness, run the
-  course self-check and review the actual report; no score is claimed yet.
+- Keep the actual API_URL and original grader URL/timeout; warm readiness and
+  rerun the course self-check after deploying this patch. The recorded 90/100
+  report predates the correction; a corrected score requires a new actual run.
 - Fill readable MP3 conversation links into llm_logs.csv, verify sources/public
   repository, then the owner completes the grading form/LLM survey and retains
   its receipt. The original grader URL and timeout remain unchanged.

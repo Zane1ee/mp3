@@ -100,14 +100,13 @@ Official references checked 2026-11-02:
 
 ## Render preparation
 
-Round 5 status, **2026-11-03**: the owner confirmed that no Render Web Service
-has been created. No public origin, deployed revision or online result exists
-yet. The actual source repository is `https://github.com/Zane1ee/mp3`, local
-branch `main`. Development changes are still local; the observed Git HEAD
-`5482863` is not the verified developed application. Publishing the reviewed
-application to the selected branch is a release prerequisite, not Git setup.
-Include new source/docs/tests and the lockfile; confirm `.env`, `.local` and
-`node_modules` are excluded before publishing. Do not deploy only the starter.
+Current owner-reported service: **https://cs409-mp3-api-wyqe.onrender.com**.
+The owner completed the original publication/deployment/acceptance and supplied a
+90/100 course grader report, with both DELETE success response checks failing.
+The 2026-11-04 correction changes them to 204/empty. Verify the newly published
+commit and repeat online acceptance after deploying this correction; the old
+score does not establish a corrected online result. The creation guide below
+remains the reproducible setup reference for the existing Zane1ee/mp3 repository.
 
 ### Create the service in the Dashboard
 
@@ -147,9 +146,10 @@ Include new source/docs/tests and the lockfile; confirm `.env`, `.local` and
    service page choose **Connect > Outbound**, then allow **all listed CIDR
    ranges** in Atlas, retaining the local development access you still need.
    A browser's/current laptop IP alone does not allow traffic from Render.
-   These ranges depend on the selected region; copy the actual service values.
-   If the first startup fails before this is configured, fix access and deploy
-   the same revision again. Broadening access to all IPs is unnecessary here.
+   README.md:89 additionally requires Allow access from anywhere (0.0.0.0/0)
+   for this course; confirm that entry as required by the assignment. Database
+   authentication remains enabled. If the first startup fails before network
+   access is configured, fix access and deploy the same revision again.
 5. Create/deploy and inspect build/start logs. Require the intended commit,
    Node 24.20.0, successful `npm ci`, index/DB readiness and a listening server.
    Copy the actual HTTPS origin and full deployed Git commit into your release
@@ -166,7 +166,7 @@ The outbound procedure is in [Render's IP documentation](https://render.com/docs
    `{message:"Ready",data:{ready:true}}`. Then GET `/api/users` or `/api/tasks`
    and require real JSON. A green deploy badge or GET `/api` alone is insufficient.
 2. From the **local mp3 directory**, run `npm run acceptance:run -- --origin`
-   followed by the actual HTTPS origin. Expect all 75 requests / 252 assertions
+   followed by the actual HTTPS origin. Expect all 75 requests / 249 assertions
    and owned cleanup to pass. This requires no Render shell or DB credentials
    in the request tool. The URL argument must omit `/api`.
 3. After online technical checks, update **only API_URL** in `submit.js` to the

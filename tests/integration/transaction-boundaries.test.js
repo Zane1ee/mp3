@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const { isolatedTestTarget } = require('../../config/environment');
 const { connectDatabase } = require('../../config/database');
 const { createRelationshipService } = require('../../lib/relationships');
+const { parseApiResponse } = require('../../scripts/api-response');
 const createApp = require('../../app');
 const world = require('../helpers/world');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env'), quiet: true });
@@ -43,7 +44,7 @@ test('Atlas Round 4 ATOM: rollback at every observed write boundary', { timeout:
               method: scenario.method, headers: { 'Content-Type': 'application/json' },
               body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(20000),
             });
-            const result = { status: response.status, ...(await response.json()) };
+            const result = parseApiResponse(response.status, await response.text(), scenario.method);
             assert.ok(trace.length > 0);
             assert.equal(trace.every((event) => event.session === trace[0].session), true);
             assert.equal(trace.every((event) => event.session.hasEnded), true, 'Transaction session is ended on success and error');
@@ -56,7 +57,7 @@ test('Atlas Round 4 ATOM: rollback at every observed write boundary', { timeout:
         await world(async (w) => {
           await scenario.prepare?.(w);
           const { result, trace } = await invoke(w, 0);
-          assert.equal(result.status, scenario.method === 'POST' ? 201 : 200);
+          assert.equal(result.status, scenario.method === 'DELETE' ? 204 : scenario.method === 'POST' ? 201 : 200);
           await w.invariants();
           boundaries = trace.length;
         });

@@ -177,10 +177,10 @@ test('Atlas Round 3: User POST/PUT and both DELETE endpoints', { timeout: 180000
       await w.invariants();
     }));
 
-    await t.test('TASK DELETE: pending, completed and unassigned states use 200 JSON and safe repeat 404', () => world(async (w) => {
+    await t.test('TASK DELETE: pending, completed and unassigned states use empty 204 and safe repeat JSON 404', () => world(async (w) => {
       for (const id of [w.task2, w.task3, w.task1]) {
         const result = await w.request('DELETE', `tasks/${id}`);
-        assert.deepEqual(result, { status: 200, message: 'Task deleted', data: [] });
+        assert.deepEqual(result, { status: 204 });
         assert.equal((await w.request('GET', `tasks/${id}`)).status, 404);
         await w.rejected('DELETE', `tasks/${id}`, undefined, 404);
         assert.deepEqual((await w.request('GET', `tasks?where=${encodeURIComponent(JSON.stringify({ _id: id }))}`)).data, []);
@@ -194,7 +194,7 @@ test('Atlas Round 3: User POST/PUT and both DELETE endpoints', { timeout: 180000
       const tasks = [await w.task(w.task2), await w.task(w.task3)];
       const otherUser = JSON.parse(JSON.stringify(await w.user(w.userB)));
       const result = await w.request('DELETE', `users/${w.userA.toUpperCase()}`);
-      assert.deepEqual(result, { status: 200, message: 'User deleted', data: [] });
+      assert.deepEqual(result, { status: 204 });
       assert.equal((await w.request('GET', `users/${w.userA}`)).status, 404);
       await w.rejected('DELETE', `users/${w.userA}`, undefined, 404);
       for (const original of tasks) {
@@ -211,12 +211,12 @@ test('Atlas Round 3: User POST/PUT and both DELETE endpoints', { timeout: 180000
     await t.test('USER DELETE: completed-only and empty users do not delete surviving tasks', () => world(async (w) => {
       const before = await w.task(w.task3);
       const result = await w.request('DELETE', `users/${w.userB}`);
-      assert.equal(result.status, 200);
+      assert.equal(result.status, 204);
       assert.equal((await w.task(w.task3)).assignedUser, '');
       assert.equal((await w.task(w.task3)).dateCreated.valueOf(), before.dateCreated.valueOf());
       const created = await w.request('POST', 'users', w.userBody());
       const snapshot = await w.snapshot();
-      assert.equal((await w.request('DELETE', `users/${created.data._id}`)).status, 200);
+      assert.equal((await w.request('DELETE', `users/${created.data._id}`)).status, 204);
       assert.deepEqual((await w.snapshot()).tasks, snapshot.tasks);
     }));
 
@@ -289,7 +289,7 @@ test('Atlas Round 3: User POST/PUT and both DELETE endpoints', { timeout: 180000
           if (action === 'rename') {
             const b = await w.user(w.userB);
             assert.equal((await w.request('PUT', `users/${w.userB}`, { name: `QA-${w.runTag}-B-new`, email: b.email })).status, 200);
-          } else assert.equal((await w.request('DELETE', `users/${w.userB}`)).status, 200);
+          } else assert.equal((await w.request('DELETE', `users/${w.userB}`)).status, 204);
           release.resolve();
           const response = await pending;
           const body = await response.json();
@@ -316,7 +316,7 @@ test('Atlas Round 3: User POST/PUT and both DELETE endpoints', { timeout: 180000
       const results = await Promise.all([w.request('PUT', `users/${w.userA}`, { name: a.name, email: a.email, pendingTasks: [w.task1, w.task2] }, { check: false }),
         w.request('DELETE', `tasks/${w.task1}`, undefined, { check: false })]);
       assert.ok([200, 404].includes(results[0].status));
-      assert.equal(results[1].status, 200);
+      assert.equal(results[1].status, 204);
       assert.equal(await w.task(w.task1), null);
       assert.equal((await w.user(w.userA)).pendingTasks.includes(w.task1), false);
       await w.invariants();

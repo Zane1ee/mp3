@@ -32,19 +32,50 @@ test('HTTP user writes: JSON/form dispatch and committed resource response', asy
   });
 });
 
-test('HTTP deletes: D6 uses 200 JSON, one resource ID and one service call', async () => {
-  const id = 'abcdef123456789012345678';
-  for (const [resource, method, label] of [['users', 'deleteUser', 'User'], ['tasks', 'deleteTask', 'Task']]) {
+for (const [resource, method] of [['users', 'deleteUser'], ['tasks', 'deleteTask']]) {
+  test(`HTTP DELETE ${resource}: 204 with zero response bytes and one service call`, async () => {
+    const id = 'abcdef123456789012345678';
     const calls = [];
     await withServer({ [method]: async (...args) => { calls.push(args); return []; } }, async (base) => {
       const response = await fetch(`${base}/${resource}/${id}`, { method: 'DELETE' });
-      assert.equal(response.status, 200);
-      assert.match(response.headers.get('content-type'), /application\/json/);
-      assert.deepEqual(await response.json(), { message: `${label} deleted`, data: [] });
+      assert.equal(response.status, 204);
+      assert.equal((await response.arrayBuffer()).byteLength, 0);
       assert.deepEqual(calls, [[id]]);
     });
-  }
-});
+  });
+
+  test(`HTTP DELETE ${resource}: failure after awaited work stays a JSON 500`, async () => {
+    const entered = Promise.withResolvers();
+    const release = Promise.withResolvers();
+    await withServer({ [method]: async () => {
+      entered.resolve();
+      await release.promise;
+      throw new Error('Private transaction failure after awaited work');
+    } }, async (base) => {
+      const pending = fetch(`${base}/${resource}/abcdef123456789012345678`, { method: 'DELETE' });
+      try {
+        await entered.promise;
+        release.resolve();
+        const response = await pending;
+        assert.equal(response.status, 500);
+        assert.deepEqual(await response.json(), { message: 'An unexpected server error occurred', data: {} });
+      } finally { release.resolve(); await pending; }
+    });
+  });
+
+  test(`HTTP DELETE ${resource}: missing target and unexpected failure keep JSON errors`, async () => {
+    for (const status of [404, 500]) {
+      await withServer({ [method]: async () => {
+        if (status === 404) throw new ApiError(404, 'Resource not found');
+        throw new Error('Private database details');
+      } }, async (base) => {
+        const response = await fetch(`${base}/${resource}/abcdef123456789012345678`, { method: 'DELETE' });
+        assert.equal(response.status, status);
+        assert.deepEqual(await response.json(), { message: status === 404 ? 'Resource not found' : 'An unexpected server error occurred', data: {} });
+      });
+    }
+  });
+}
 
 test('HTTP user/deletes: safe known errors, private unexpected failures and parser precedence', async () => {
   await withServer({

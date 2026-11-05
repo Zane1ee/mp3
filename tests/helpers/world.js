@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const { once } = require('node:events');
 const { createFixtures } = require('../../scripts/fixtures');
 const { createRelationshipService } = require('../../lib/relationships');
+const { parseApiResponse } = require('../../scripts/api-response');
 const createApp = require('../../app');
 const User = require('../../models/user');
 const Task = require('../../models/task');
@@ -54,7 +55,7 @@ module.exports = async function world(run) {
         headers: options.form ? undefined : { 'Content-Type': 'application/json' },
         body: body === undefined ? undefined : options.form ? new URLSearchParams(body) : JSON.stringify(body),
       });
-      const result = { status: response.status, ...(await response.json()) };
+      const result = parseApiResponse(response.status, await response.text(), method);
       if (options.check !== false && result.status < 300 && method !== 'GET') await state.invariants();
       return result;
     },

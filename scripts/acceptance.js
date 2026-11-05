@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const vm = require('node:vm');
+const { parseApiResponse } = require('./api-response');
 const root = path.join(__dirname, '..');
 const defaultManifest = path.join(root, '.local', 'http-acceptance.json');
 const collectionPath = path.join(root, 'docs', 'mp3.postman_collection.json');
@@ -51,11 +52,7 @@ async function response(origin, resource, options = {}) {
 async function jsonRequest(origin, method, resource, body) {
   const { result, text } = await response(origin, resource, { method,
     headers: { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
-  let envelope;
-  try { envelope = JSON.parse(text); } catch { throw new Error(`Expected JSON for ${method} ${resource.split('?')[0]}; HTTP ${result.status}.`); }
-  assert.deepEqual(Object.keys(envelope).sort(), ['data', 'message']);
-  assert.equal(typeof envelope.message, 'string');
-  return { status: result.status, ...envelope };
+  return parseApiResponse(result.status, text, method);
 }
 
 async function prepare(origin, manifestPath = defaultManifest) {
@@ -180,8 +177,7 @@ async function cleanup(manifestPath = defaultManifest) {
   // Preflight all links before deleting anything; stop other manual writes first.
   for (const [resource, ids] of [['tasks', taskIds], ['users', userIds]]) for (const id of ids) {
     const deleted = await jsonRequest(origin, 'DELETE', `/${resource}/${id}`);
-    assert.equal(deleted.status, 200);
-    assert.deepEqual(deleted.data, []);
+    assert.deepEqual(deleted, { status: 204 });
     assert.equal((await jsonRequest(origin, 'GET', `/${resource}/${id}`)).status, 404);
   }
   assert.equal((await find('users', { name: { $regex: `^${prefix}` } })).length, 0);

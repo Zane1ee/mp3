@@ -47,6 +47,14 @@ const implemented = Object.values(spec.paths).flatMap((operations) => Object.val
   .filter((operation) => operation['x-implementation-status'] === 'implemented' && operation.operationId?.startsWith('HTTP-'))
   .map((operation) => operation.operationId).sort();
 assert.deepEqual(implemented, operationIds.sort());
+for (const route of ['/users/{id}', '/tasks/{id}']) {
+  const responses = spec.paths[route].delete.responses;
+  assert.ok(responses['204'], `${route} DELETE must document HTTP 204.`);
+  assert.equal(responses['204'].content, undefined, 'DELETE 204 must not declare JSON content.');
+  assert.equal(responses['200'], undefined, 'The provisional DELETE 200 contract is superseded.');
+  assert.ok(responses['404'].content['application/json']);
+  assert.ok(responses['500'].content['application/json']);
+}
 function references(value) {
   if (!value || typeof value !== 'object') return;
   if (value.$ref) {

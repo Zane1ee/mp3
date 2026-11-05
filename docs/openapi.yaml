@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "CS409 MP3 API",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "description": "Approved ten-operation API contract. Local release-candidate verification, owner acceptance and online release gates remain separate in SOP.txt. Query field paths are validated before MongoDB execution. JSON syntax is valid YAML 1.2."
   },
   "servers": [
@@ -265,15 +265,8 @@
         "x-implementation-round": 3,
         "x-implementation-status": "implemented",
         "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteResponse"
-                }
-              }
-            }
+          "204": {
+            "description": "Deleted successfully; no response body"
           },
           "400": {
             "description": "Invalid input or query",
@@ -311,7 +304,7 @@
             "$ref": "#/components/parameters/id"
           }
         ],
-        "description": "Owner-approved provisional D6: 200 with JSON. Not a guarantee of unreleased grader behavior."
+        "description": "D6 resolved by actual course grader feedback: successful DELETE is 204 with no body. Errors retain the JSON envelope."
       }
     },
     "/tasks": {
@@ -568,15 +561,8 @@
         "x-implementation-round": 3,
         "x-implementation-status": "implemented",
         "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteResponse"
-                }
-              }
-            }
+          "204": {
+            "description": "Deleted successfully; no response body"
           },
           "400": {
             "description": "Invalid input or query",
@@ -614,7 +600,7 @@
             "$ref": "#/components/parameters/id"
           }
         ],
-        "description": "Owner-approved provisional D6: 200 with JSON. Not a guarantee of unreleased grader behavior."
+        "description": "D6 resolved by actual course grader feedback: successful DELETE is 204 with no body. Errors retain the JSON envelope."
       }
     },
     "/": {
@@ -1032,23 +1018,6 @@
                 "minimum": 0
               }
             ]
-          }
-        }
-      },
-      "DeleteResponse": {
-        "type": "object",
-        "required": [
-          "message",
-          "data"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "type": "array",
-            "maxItems": 0
           }
         }
       }

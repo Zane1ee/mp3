@@ -85,3 +85,15 @@ Round 5 deployment preparation, checked 2026-11-03:
   not a Blueprint or a claim that one was deployed.
 - The owner confirmed no Render service exists. No cloud account modification,
   public URL, grader score, shared-log completion or form receipt is fabricated.
+
+DELETE response correction, 2026-11-04:
+
+- Owner-provided course autograder report for
+  https://cs409-mp3-api-wyqe.onrender.com: 90/100, both DELETE success responses
+  require 204/no content; deleted-resource GET checks passed. This resolves D6
+  and supersedes the provisional 200/JSON decision. No corrected score is claimed.
+- [RFC 9110, 204](https://www.rfc-editor.org/rfc/rfc9110.html#section-15.3.5):
+  204 responses contain no response content. The actual deletion router, shared
+  JSON helper and client parser/test assumptions were inspected before the fix.
+- Actual README.md:89 explicitly requires Atlas Allow access from anywhere;
+  setup guidance is corrected to match the assignment. Credentials remain private.
